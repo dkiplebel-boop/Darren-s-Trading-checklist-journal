@@ -1,1591 +1,736 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Darren's Trading Suite & Confluence Engine</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            850: '#1e293b',
-                            950: '#020617',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Custom scrollbar styling to match cyberpunk aesthetic */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #020617;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #1e293b;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #22d3ee;
-        }
-    </style>
-</head>
-<body class="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>KÖCE Trading Journal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for Apple-style high-performance telemetry rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Ultra-Premium iOS Apple Matte Graphite Background */
+    body {
+      background: radial-gradient(circle at 50% -30%, #1e2230 0%, #07080a 100%);
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    
+    /* Extreme Liquid Glassmorphism Styling Sheets - Shifted to Deep Pill Morphing */
+    .liquid-glass {
+      background: rgba(23, 26, 38, 0.45);
+      backdrop-filter: blur(35px) saturate(220%);
+      -webkit-backdrop-filter: blur(35px) saturate(220%);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.05),
+        0 1px 2px rgba(0, 0, 0, 0.4),
+        0 25px 50px rgba(0, 0, 0, 0.5);
+    }
 
-    <header class="border-b border-slate-900 bg-slate-950/80 backdrop-blur sticky top-0 z-50 px-4 py-3 md:px-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-cyan-950 border border-cyan-500/30 rounded-lg shadow-lg shadow-cyan-500/10">
-                    <i data-lucide="sparkles" class="h-6 w-6 text-cyan-400 animate-pulse"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl md:text-2xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">
-                        DARREN'S TRADING PORTAL
-                    </h1>
-                    <p class="text-xs text-slate-400">Systematic Rule-Based Trade Confluence Engine</p>
-                </div>
-            </div>
-            
-            <nav class="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800">
-                <button onclick="switchTab('matrix')" id="tab-matrix" class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-cyan-400 bg-cyan-950/50 border border-cyan-500/20 shadow">
-                    <i data-lucide="layout-grid" class="h-4 w-4"></i>
-                    Confluence Matrix
-                </button>
-                <button onclick="switchTab('journal')" id="tab-journal" class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800">
-                    <i data-lucide="book-open" class="h-4 w-4"></i>
-                    Trade Journal
-                </button>
-                <button onclick="switchTab('calendar')" id="tab-calendar" class="flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800">
-                    <i data-lucide="calendar" class="h-4 w-4"></i>
-                    Profit Calendar
-                </button>
-            </nav>
-            
-            <div class="flex items-center gap-3">
-                <button onclick="resetMatrix()" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-900 border border-rose-500/20 text-rose-400 hover:bg-rose-950/20 text-xs font-semibold transition" title="Clear current inputs">
-                    <i data-lucide="rotate-ccw" class="h-4 w-4"></i>
-                    Reset Matrix
-                </button>
-            </div>
+    .liquid-dock {
+      background: rgba(32, 36, 54, 0.5);
+      backdrop-filter: blur(45px) saturate(230%);
+      -webkit-backdrop-filter: blur(45px) saturate(230%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        0 -20px 60px rgba(0, 0, 0, 0.7), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Soft Luxury Apple Matte Indicators - Extreme Pill Profiles */
+    .profit-glow {
+      background: linear-gradient(135deg, rgba(52, 211, 153, 0.06) 0%, rgba(16, 185, 129, 0.01) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.25) !important;
+    }
+    .loss-glow {
+      background: linear-gradient(135deg, rgba(251, 113, 133, 0.06) 0%, rgba(244, 63, 94, 0.01) 100%);
+      border: 1px solid rgba(251, 113, 133, 0.25) !important;
+    }
+    
+    .today-ring {
+      border: 2px solid #ffffff !important;
+      background: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Hide default scroll system paths */
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body class="pb-32 pt-4 px-3 sm:p-6 md:p-8 min-h-screen">
+
+  <div class="max-w-6xl mx-auto space-y-4">
+    
+    <!-- App Header Top Deck -->
+    <header class="flex flex-col gap-3 p-4 liquid-glass rounded-3xl sm:flex-row sm:items-center sm:justify-between">
+      <div class="space-y-0.5">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-bold tracking-[0.25em] text-slate-400 uppercase">KÖCE INTELLECT</span>
+          <span class="text-[9px] bg-white/5 border border-white/10 text-slate-400 font-mono px-2 py-0.5 rounded-full">V3.2 PRO</span>
         </div>
+        <h1 class="text-xl font-semibold tracking-tight text-white">Executive Hub</h1>
+      </div>
+      
+      <!-- Controls Layout Optimized for Small Viewports -->
+      <div class="flex flex-wrap items-center gap-2 sm:gap-3 justify-between sm:justify-end">
+        <!-- Capital Sizing Core Unit -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-1 flex items-center gap-1 text-[10px] font-mono">
+          <span class="text-slate-500 pl-1.5 pr-0.5 select-none">Account:</span>
+          <input type="number" id="account-base-input" value="10000" step="100" class="w-16 bg-slate-950/40 border border-white/5 rounded-xl px-1.5 py-0.5 focus:outline-none focus:border-white/20 text-white font-bold text-center" onchange="updateBaseCapital(this.value)">
+          <span id="capital-currency-label" class="text-slate-400 pr-1 select-none">USD</span>
+        </div>
+        
+        <!-- Currency Integration Control Deck -->
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-1 flex items-center gap-1 text-[10px] font-mono">
+          <span class="text-slate-500 pl-1.5 pr-0.5 select-none">1 USD =</span>
+          <input type="number" id="exchange-rate-input" value="129.50" step="0.01" class="w-14 bg-slate-950/40 border border-white/5 rounded-xl px-1.5 py-0.5 focus:outline-none focus:border-white/20 text-white font-bold text-center" onchange="updateExchangeRate(this.value)">
+          <span class="text-slate-400 pr-1 select-none">KES</span>
+        </div>
+        
+        <div class="bg-white/5 border border-white/10 rounded-2xl p-1 flex items-center relative">
+          <button onclick="toggleCurrency('USD')" id="currency-usd-btn" class="px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer bg-white text-slate-950">USD</button>
+          <button onclick="toggleCurrency('KES')" id="currency-kes-btn" class="px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer text-slate-400 hover:text-white">KES</button>
+        </div>
+        
+        <div class="text-right flex flex-col items-end w-full sm:w-auto mt-1 sm:mt-0">
+          <span class="text-[9px] uppercase font-bold tracking-widest text-emerald-400 flex items-center gap-1.5 bg-emerald-950/20 border border-emerald-900/30 px-2.5 py-0.5 rounded-full">
+            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Live Matrix
+          </span>
+          <span id="current-date-badge" class="text-xs font-medium text-slate-300 mt-1">July 5, 2026</span>
+        </div>
+      </div>
     </header>
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+    <!-- Apple Minimal Performance Readouts -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-3">
+      <div class="liquid-glass p-3 sm:p-4 rounded-3xl space-y-0.5">
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Win Ratio</span>
+        <h2 id="stat-winrate" class="text-xl sm:text-2xl font-semibold text-white tracking-tight">0%</h2>
+      </div>
+      <div class="liquid-glass p-3 sm:p-4 rounded-3xl space-y-0.5">
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Net Liquidation</span>
+        <span id="stat-netprofit" class="text-xl sm:text-2xl font-semibold text-slate-300 tracking-tight block">$0.00</span>
+      </div>
+      <div class="liquid-glass p-3 sm:p-4 rounded-3xl space-y-0.5 bg-white/[0.02]">
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest block flex flex-wrap items-center gap-1">Weekly Goal <span id="target-baseline-label" class="text-[8px] font-mono text-emerald-400/80">(Target: $200)</span></span>
+        <span id="stat-weeklygoal" class="text-xl sm:text-2xl font-semibold text-slate-300 tracking-tight block">0.00%</span>
+      </div>
+      <div class="liquid-glass p-3 sm:p-4 rounded-3xl space-y-0.5">
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Sample Size</span>
+        <span id="stat-total" class="text-xl sm:text-2xl font-semibold text-slate-300 tracking-tight block">0 Logs</span>
+      </div>
+      <div class="liquid-glass p-3 sm:p-4 rounded-3xl space-y-0.5 col-span-2 md:col-span-1">
+        <span class="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest block">Profit Factor</span>
+        <span id="stat-profitfactor" class="text-xl sm:text-2xl font-semibold text-slate-300 tracking-tight block">0.00</span>
+      </div>
+    </section>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-        
-        <div id="page-content-matrix" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-8 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/60 border border-slate-800/80 p-4 rounded-xl">
-                    <div class="flex flex-col gap-1.5 justify-center">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Setup Bias</span>
-                        <div class="grid grid-cols-2 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
-                            <button id="btn-bias-long" onclick="setBias('LONG')" class="py-1.5 text-xs font-bold rounded uppercase transition bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                                Long Bias
-                            </button>
-                            <button id="btn-bias-short" onclick="setBias('SHORT')" class="py-1.5 text-xs font-bold rounded uppercase transition text-slate-400 hover:bg-slate-900">
-                                Short Bias
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-1.5 justify-center">
-                        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Target Symbol</label>
-                        <div class="relative">
-                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"></i>
-                            <input type="text" id="input-ticker" value="BTCUSD" oninput="updateTicker(this.value)" placeholder="e.g. BTCUSD, EURUSD" class="w-full bg-slate-950 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-lg pl-9 pr-3 py-1.5 text-sm font-bold text-cyan-300 uppercase tracking-widest outline-none transition" />
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-end">
-                        <button onclick="toggleConfigPanel()" class="w-full md:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-xs font-semibold transition text-slate-200">
-                            <i data-lucide="settings" class="h-4 w-4 text-cyan-400"></i>
-                            Configure Weights
-                        </button>
-                    </div>
-                </div>
-
-                <div id="config-panel" class="hidden bg-slate-900 border border-cyan-500/20 p-5 rounded-xl space-y-4">
-                    <div class="flex justify-between items-center border-b border-slate-800 pb-2 flex-wrap gap-2">
-                        <h3 class="text-sm font-bold text-cyan-300 flex items-center gap-1.5">
-                            <i data-lucide="settings" class="h-4 w-4"></i> Custom Row Weights Calibration
-                        </h3>
-                        <span id="label-total-weight" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
-                            Total Weight: 100%
-                        </span>
-                    </div>
-                    <p class="text-xs text-slate-400">
-                        Define the importance (weight) of each confluence factor. Checkboxes will accumulate score based on these assigned weights.
-                    </p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div id="weight-editor-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
-                        <div class="bg-slate-950 p-3 rounded-lg border border-slate-850 flex flex-col justify-between gap-3">
-                            <div>
-                                <h4 class="text-xs font-bold text-slate-300 mb-2">Add Strategy Metric</h4>
-                                <div class="space-y-2">
-                                    <input type="text" id="new-metric-name" placeholder="Metric Name (e.g., FVG Fill, Volume Profile)" class="w-full bg-slate-900 border border-slate-800 text-xs rounded p-2 text-slate-200 outline-none focus:border-cyan-500" />
-                                    <div class="flex items-center gap-2">
-                                        <span class="text-xs text-slate-400">Weight Significance:</span>
-                                        <input type="number" id="new-metric-weight" value="15" class="w-16 bg-slate-900 border border-slate-800 text-xs rounded p-1 text-center font-bold text-cyan-400" />
-                                        <span class="text-xs text-slate-400">%</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <button onclick="addCustomRow()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold py-1.5 rounded text-xs transition flex items-center justify-center gap-1">
-                                <i data-lucide="plus" class="h-4 w-4"></i> Add Row Metric
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/40 border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl">
-                    <div class="bg-slate-900 p-4 border-b border-slate-800/80 flex justify-between items-center flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="h-2 w-2 rounded-full bg-cyan-400 animate-ping"></span>
-                            <span class="text-sm font-black text-cyan-400 tracking-wider">MATRICES CHECKLIST GRID</span>
-                        </div>
-                        <div class="text-xs text-slate-400 font-medium">
-                            Check the box to confirm matching confluence per timeframe.
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead>
-                                <tr class="bg-slate-950/80 text-xs text-slate-400 uppercase tracking-widest border-b border-slate-850">
-                                    <th class="py-4 px-4 font-bold text-slate-300 w-1/4">TRADING INPUT</th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>Weekly</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 25%</div>
-                                    </th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>Daily</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 25%</div>
-                                    </th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>4 Hour</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 20%</div>
-                                    </th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>2 Hour</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 12%</div>
-                                    </th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>1 Hour</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 10%</div>
-                                    </th>
-                                    <th class="py-4 px-3 font-bold text-center border-l border-slate-900/50 w-[12%]">
-                                        <div>30 Min</div><div class="text-[9px] text-slate-500 font-medium lowercase">weight 8%</div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody id="confluence-table-body" class="divide-y divide-slate-900/60"></tbody>
-                        </table>
-                    </div>
-                    <div class="bg-slate-950 p-5 border-t border-slate-800 space-y-3">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                <i data-lucide="zap" class="h-3.5 w-3.5 text-cyan-400"></i> Entry Signal Triggers (Select Multiple):
-                            </span>
-                            <div id="entry-triggers-container" class="flex flex-wrap gap-2 pt-1"></div>
-                        </div>
-                        <p class="text-[11px] text-slate-500 italic">
-                            *Accumulated checks directly update the master weighted progress score. Active entry triggers are highlighted in the status summary.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900/60 border border-slate-800/80 p-5 rounded-xl space-y-4">
-                    <h4 class="text-xs font-black text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <i data-lucide="book-open" class="h-4 w-4"></i> Analysis Notes & Trade Observations
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="space-y-2">
-                            <label class="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Risk Parameters</label>
-                            <div class="flex items-center gap-3">
-                                <input type="range" id="input-risk" min="0.25" max="3" step="0.25" value="1" oninput="updateRiskValue(this.value)" class="w-full accent-cyan-500 cursor-pointer" />
-                                <span id="label-risk" class="text-xs font-black text-cyan-400 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded w-16 text-center">1.00%</span>
-                            </div>
-                            <p class="text-[10px] text-slate-500">Suggested size based on rules.</p>
-                        </div>
-                        <div class="md:col-span-2 space-y-1.5">
-                            <label class="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Analysis Notes</label>
-                            <textarea id="text-notes" placeholder="e.g., Weekly trend is strongly bullish, Price is currently testing dynamic EMA support inside of the Daily Area of Interest." rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition resize-none"></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-6 relative overflow-hidden shadow-2xl">
-                    <div class="absolute -right-20 -top-20 w-40 h-40 bg-cyan-500/10 blur-3xl rounded-full"></div>
-                    <div class="absolute -left-20 -bottom-20 w-40 h-40 bg-teal-500/10 blur-3xl rounded-full"></div>
-                    <div class="space-y-1">
-                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Combined Score Match</span>
-                        <h3 class="text-xs text-slate-500 font-medium">Weighted Average across HTF/LTF Matrix</h3>
-                    </div>
-                    <div class="relative flex items-center justify-center mx-auto w-40 h-40">
-                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="40" class="stroke-slate-800 fill-none" stroke-width="8" />
-                            <circle id="gauge-progress" cx="50" cy="50" r="40" class="stroke-cyan-500 fill-none transition-all duration-300 ease-out" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" />
-                        </svg>
-                        <div class="absolute flex flex-col items-center justify-center">
-                            <span id="score-text" class="text-4xl font-black text-white tracking-tighter">0%</span>
-                            <span class="text-[9px] uppercase font-bold tracking-widest text-slate-400 mt-1">Confluence</span>
-                        </div>
-                    </div>
-                    <div id="rank-card" class="p-4 rounded-xl border border-slate-800 bg-slate-950 space-y-2">
-                        <div class="flex items-center justify-center gap-1.5">
-                            <i id="rank-icon" data-lucide="help-circle" class="h-4 w-4 text-slate-400"></i>
-                            <span id="rank-name" class="text-sm font-black uppercase tracking-wider text-slate-400">Neutral State</span>
-                        </div>
-                        <p id="rank-desc" class="text-xs text-slate-300 leading-relaxed font-medium">Check key confluences to update recommendations.</p>
-                    </div>
-                    <button onclick="prefillJournalEntryFromMatrix()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-xs font-black uppercase text-slate-950 tracking-wider shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1.5 transition-all">
-                        <i data-lucide="plus-circle" class="h-4 w-4"></i> Export current to Journal
-                    </button>
-                    <div class="grid grid-cols-2 gap-2 border-t border-slate-800 pt-4 text-left">
-                        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850">
-                            <span class="text-[9px] text-slate-500 uppercase font-black block">Active Triggers</span>
-                            <span id="summary-trigger" class="text-[11px] font-bold text-slate-500 italic break-words line-clamp-2">No Trigger Selected</span>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850">
-                            <span class="text-[9px] text-slate-500 uppercase font-black block">Bias Target</span>
-                            <span id="summary-bias" class="text-[11px] font-black uppercase flex items-center gap-1 text-emerald-400">
-                                <i data-lucide="trending-up" class="h-3.5 w-3.5"></i> LONG
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-                    <h4 class="text-xs font-black tracking-wider uppercase text-cyan-400">Confluence Playbook Rules</h4>
-                    <div class="space-y-3 text-xs">
-                        <div class="p-2.5 rounded bg-emerald-500/5 border border-emerald-500/10">
-                          <span class="font-bold text-emerald-400">A+ Elite Setup (>= 85% Score)</span>
-                          <p class="text-[11px] text-slate-400 mt-0.5">High conviction. Complete alignment across multi-timeframes.</p>
-                        </div>
-                        <div class="p-2.5 rounded bg-cyan-500/5 border border-cyan-500/10">
-                          <span class="font-bold text-cyan-400">A-Grade Setup (70% - 84% Score)</span>
-                          <p class="text-[11px] text-slate-400 mt-0.5">High probability structure. Alignment across major sessions.</p>
-                        </div>
-                        <div class="p-2.5 rounded bg-amber-500/5 border border-amber-500/10">
-                          <span class="font-bold text-amber-400">B-Grade Setup (50% - 69% Score)</span>
-                          <p class="text-[11px] text-slate-400 mt-0.5">Moderate checks. Consider halving standard risk profile.</p>
-                        </div>
-                        <div class="p-2.5 rounded bg-rose-500/5 border border-rose-500/10">
-                          <span class="font-bold text-rose-400">No Trade Setup (&lt; 50% Score)</span>
-                          <p class="text-[11px] text-slate-400 mt-0.5">Avoid entry. Conflicting trend direction or insufficient checks.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Main Workspace Area -->
+    <main class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
+      
+      <!-- VIEW A: THE CALENDAR MODULE LAYER -->
+      <div id="view-calendar" class="lg:col-span-2 liquid-glass p-3 sm:p-5 rounded-3xl space-y-3">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+            <h2 id="calendar-month-year" class="font-medium text-xs sm:text-base tracking-tight text-white"></h2>
+          </div>
+          <div class="flex gap-1">
+            <button onclick="navigateMonth(-1)" class="p-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-slate-400 hover:text-white transition cursor-pointer"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+            <button onclick="navigateMonth(1)" class="p-1.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-slate-400 hover:text-white transition cursor-pointer"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+          </div>
         </div>
-
-        <div id="page-content-journal" class="hidden space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-5 space-y-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5">
-                        <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-                            <i data-lucide="edit-3" class="h-5 w-5 text-cyan-400"></i>
-                            <div>
-                                <h2 id="j-form-title" class="text-lg font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-300">LOG NEW TRANSACTION</h2>
-                                <p class="text-xs text-slate-400 font-medium">Document the execution and screenshot variables</p>
-                            </div>
-                        </div>
-
-                        <form id="journal-form" onsubmit="saveJournalEntry(event)" class="space-y-4 text-xs">
-                            <div id="j-import-banner" class="p-2.5 bg-cyan-950/40 border border-cyan-500/20 rounded-lg flex items-center justify-between text-[11px] text-cyan-300">
-                                <span>Copy from current matrix setup?</span>
-                                <button type="button" onclick="loadFromCurrentMatrix()" class="px-2.5 py-1 rounded bg-cyan-500 text-slate-950 font-extrabold uppercase hover:bg-cyan-400 transition">Import</button>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="space-y-1.5">
-                                    <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Asset/Ticker</label>
-                                    <input type="text" id="j-ticker" required placeholder="e.g. BTCUSD" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-cyan-500 font-bold uppercase" />
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Setup Bias</label>
-                                    <select id="j-bias" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 outline-none focus:border-cyan-500 font-bold">
-                                        <option value="LONG" class="text-emerald-400">LONG</option>
-                                        <option value="SHORT" class="text-rose-400">SHORT</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="space-y-1.5">
-                                    <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Confluence Score (%)</label>
-                                    <input type="number" id="j-score" min="0" max="100" placeholder="e.g. 85" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 font-bold outline-none focus:border-cyan-500" />
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Risk Sizing (%)</label>
-                                    <input type="number" id="j-risk" min="0" max="10" step="0.1" placeholder="e.g. 1.0" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-200 font-bold outline-none focus:border-cyan-500" />
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="space-y-1.5">
-                                    <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Trade Outcome</label>
-                                    <select id="j-outcome" onchange="toggleJournalOutcomeStyling()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-emerald-400 font-black outline-none focus:border-cyan-500">
-                                        <option value="WIN" class="text-emerald-400">PROFITABLE (WIN)</option>
-                                        <option value="LOSS" class="text-rose-400">UNREALIZED/LOSS</option>
-                                        <option value="PENDING" class="text-slate-400">OPEN/PENDING</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-1.5">
-                                    <label id="j-pnl-label" class="text-emerald-400 uppercase font-black tracking-widest text-[10px]">Net PnL ($ / R-Multiple)</label>
-                                    <input type="text" id="j-pnl" placeholder="e.g. +$450 or +3.2R" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-emerald-400 font-bold outline-none focus:border-cyan-500" />
-                                </div>
-                            </div>
-
-                            <div class="space-y-2">
-                                <label class="text-slate-400 uppercase font-black tracking-widest text-[10px] block">Upload Chart Screenshots (Up to 2)</label>
-                                <div id="screenshot-uploader-zone" class="relative group border-2 border-dashed border-slate-800 hover:border-cyan-500/50 bg-slate-950 p-4 rounded-xl text-center cursor-pointer transition-all">
-                                    <input type="file" id="j-screenshot" accept="image/*" multiple onchange="handleImageUpload(event)" class="absolute inset-0 opacity-0 cursor-pointer" />
-                                    <div id="uploader-placeholder" class="space-y-2">
-                                        <i data-lucide="image" class="h-8 w-8 mx-auto text-slate-600 group-hover:text-cyan-400 transition-colors"></i>
-                                        <p class="text-slate-400 font-semibold text-[11px]">Drag & drop trade canvases, or <span class="text-cyan-400">browse</span></p>
-                                        <p class="text-[9px] text-slate-500 italic">Select 1 or 2 images. JPG, PNG, GIF files.</p>
-                                    </div>
-                                    <div id="uploader-preview-container" class="hidden grid grid-cols-2 gap-2 relative max-w-full">
-                                        <div id="preview-wrapper-0" class="hidden relative inline-block">
-                                            <img id="uploader-preview-img-0" src="" alt="screenshot preview 1" class="max-h-40 mx-auto rounded border border-slate-800" />
-                                        </div>
-                                        <div id="preview-wrapper-1" class="hidden relative inline-block">
-                                            <img id="uploader-preview-img-1" src="" alt="screenshot preview 2" class="max-h-40 mx-auto rounded border border-slate-800" />
-                                        </div>
-                                        <button type="button" onclick="clearUploadedImages(event)" class="absolute -top-2 -right-2 bg-rose-600 hover:bg-rose-500 text-white rounded-full p-1.5 shadow z-10" title="Remove images">
-                                            <i data-lucide="x" class="h-3.5 w-3.5"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="space-y-1.5">
-                                <label class="text-slate-400 uppercase font-black tracking-widest text-[10px]">Strategy Notes & Learnings</label>
-                                <textarea id="j-notes" placeholder="e.g., Entry was perfectly timed on the 1H FVG mitigation. Retest gave exact confirmation. Exit at key daily liquidity sweep level." rows="3" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 outline-none focus:border-cyan-500 resize-none"></textarea>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button id="j-submit-btn" type="submit" class="w-full py-3 bg-gradient-to-r from-cyan-500 to-teal-500 text-slate-950 font-black tracking-wider uppercase rounded-xl hover:shadow-lg hover:shadow-cyan-500/20 active:scale-95 transition">
-                                    Commit Entry to Ledger
-                                </button>
-                                <button id="j-cancel-btn" type="button" onclick="cancelEditJournalEntry()" class="hidden px-4 py-3 bg-slate-850 hover:bg-slate-800 text-slate-300 font-black uppercase rounded-xl border border-slate-800 hover:border-slate-700 transition shrink-0">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-7 space-y-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="database" class="h-5 w-5 text-cyan-400"></i>
-                                <h2 class="text-lg font-black tracking-wide">MY TRADING LEDGER</h2>
-                            </div>
-                            <div class="flex gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
-                                <button onclick="filterJournal('ALL')" id="filter-j-all" class="px-2.5 py-1 text-[10px] font-bold uppercase rounded bg-slate-900 text-cyan-400">ALL</button>
-                                <button onclick="filterJournal('WIN')" id="filter-j-win" class="px-2.5 py-1 text-[10px] font-bold uppercase rounded text-slate-400 hover:text-slate-200">WINS</button>
-                                <button onclick="filterJournal('LOSS')" id="filter-j-loss" class="px-2.5 py-1 text-[10px] font-bold uppercase rounded text-slate-400 hover:text-slate-200">LOSSES</button>
-                            </div>
-                        </div>
-                        <div id="journal-ledger-container" class="space-y-4 max-h-[700px] overflow-y-auto pr-2"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="grid grid-cols-7 gap-1 text-center text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-slate-500">
+          <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
         </div>
+        <div id="calendar-grid" class="grid grid-cols-7 gap-1 auto-rows-[minmax(50px,auto)] sm:auto-rows-[minmax(60px,auto)]"></div>
+      </div>
 
-        <div id="page-content-calendar" class="hidden space-y-8">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div class="lg:col-span-4 space-y-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
-                        <h3 class="text-xs font-black tracking-widest text-cyan-400 uppercase flex items-center gap-1.5">
-                            <i data-lucide="bar-chart-2" class="h-4 w-4"></i> Month Performance Index
-                        </h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                                <span class="text-[9px] uppercase font-black text-slate-400 block tracking-wider">Net Monthly P&L</span>
-                                <span id="cal-stat-pnl" class="text-base font-black tracking-tight text-slate-300">$0.00</span>
-                            </div>
-                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                                <span class="text-[9px] uppercase font-black text-slate-400 block tracking-wider">Win Ratio (Days)</span>
-                                <span id="cal-stat-winrate" class="text-base font-black tracking-tight text-cyan-400">0%</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                                <span class="text-[9px] uppercase font-black text-slate-400 block tracking-wider">Green Days</span>
-                                <span id="cal-stat-green" class="text-base font-bold text-emerald-400">0 Days</span>
-                            </div>
-                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-850">
-                                <span class="text-[9px] uppercase font-black text-slate-400 block tracking-wider">Red Days</span>
-                                <span id="cal-stat-red" class="text-base font-bold text-rose-400">0 Days</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="calendar-day-editor-card" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 relative">
-                        <div class="flex items-center gap-2 border-b border-slate-800 pb-3">
-                            <i data-lucide="calendar-plus" class="h-5 w-5 text-cyan-400"></i>
-                            <div>
-                                <h3 class="text-sm font-black tracking-wider uppercase text-slate-200">Log Daily Performance</h3>
-                                <p id="cal-editor-date-text" class="text-[11px] text-slate-400 font-medium">Select any day on the grid to begin</p>
-                            </div>
-                        </div>
-
-                        <form id="cal-day-form" onsubmit="saveDailyProfit(event)" class="space-y-4 text-xs">
-                            <input type="hidden" id="cal-editor-date" />
-                            <div class="space-y-1.5">
-                                <label class="text-slate-400 uppercase font-black tracking-widest text-[9px] block">Outcome Type</label>
-                                <div class="grid grid-cols-3 gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
-                                    <button type="button" onclick="selectCalDayOutcome('WIN')" id="btn-cal-outcome-win" class="py-1 rounded text-[10px] font-bold uppercase transition bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">WIN</button>
-                                    <button type="button" onclick="selectCalDayOutcome('LOSS')" id="btn-cal-outcome-loss" class="py-1 rounded text-[10px] font-bold uppercase transition text-slate-400 hover:bg-slate-900">LOSS</button>
-                                    <button type="button" onclick="selectCalDayOutcome('FLAT')" id="btn-cal-outcome-flat" class="py-1 rounded text-[10px] font-bold uppercase transition text-slate-400 hover:bg-slate-900">FLAT</button>
-                                </div>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-slate-400 uppercase font-black tracking-widest text-[9px]">Profit / Loss ($ Amount)</label>
-                                <div class="relative">
-                                    <span id="cal-currency-symbol" class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 font-black">$</span>
-                                    <input type="number" id="cal-day-amount" placeholder="0.00" step="any" class="w-full bg-slate-950 border border-slate-800 text-emerald-400 focus:border-cyan-500 rounded-lg pl-8 pr-3 py-2 text-xs font-bold outline-none transition" />
-                                </div>
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="text-slate-400 uppercase font-black tracking-widest text-[9px]">Brief Session Review</label>
-                                <textarea id="cal-day-notes" placeholder="e.g. Complied with mechanical rules. Stopped trading after target hit." rows="2" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 outline-none focus:border-cyan-500 resize-none"></textarea>
-                            </div>
-                            <button type="submit" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black tracking-wider uppercase rounded-xl transition-all">
-                                Update Profit Ledger
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-8 space-y-6">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-5 shadow-2xl">
-                        <div class="flex items-center justify-between border-b border-slate-800 pb-4 flex-wrap gap-2">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 bg-slate-950 border border-slate-850 rounded-lg text-cyan-400">
-                                    <i data-lucide="calendar" class="h-5 w-5"></i>
-                                </div>
-                                <div>
-                                    <h2 id="calendar-month-year-label" class="text-lg font-black uppercase tracking-wider text-slate-100">JANUARY 2026</h2>
-                                    <p class="text-xs text-slate-400 font-medium">Mechanical performance overview breakdown</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-850">
-                                <button onclick="navigateMonth(-1)" class="p-2 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-200 transition" title="Previous Month">
-                                    <i data-lucide="chevron-left" class="h-4 w-4"></i>
-                                </button>
-                                <button onclick="setCalendarToToday()" class="px-3 py-1.5 text-xs font-bold rounded-lg text-cyan-400 hover:bg-slate-900 transition">Current Month</button>
-                                <button onclick="navigateMonth(1)" class="p-2 rounded-lg hover:bg-slate-900 text-slate-400 hover:text-slate-200 transition" title="Next Month">
-                                    <i data-lucide="chevron-right" class="h-4 w-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <div class="grid grid-cols-7 gap-2 text-center text-[10px] font-black uppercase text-slate-500 tracking-wider py-1">
-                                <div>Sun</div>
-                                <div>Mon</div>
-                                <div>Tue</div>
-                                <div>Wed</div>
-                                <div>Thu</div>
-                                <div>Fri</div>
-                                <div>Sat</div>
-                            </div>
-                            <div id="calendar-grid-cells" class="grid grid-cols-7 gap-2"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- VIEW B: THE TELEMETRY GRAPH INTERACTIVE LAYER (Hidden Initially) -->
+      <div id="view-graph" class="hidden lg:col-span-2 liquid-glass p-3 sm:p-5 rounded-3xl space-y-3 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2">
+          <div class="flex items-center gap-2">
+            <i data-lucide="trending-up" class="w-4 h-4 text-slate-400"></i>
+            <h2 class="font-medium text-xs sm:text-base tracking-tight text-white">Growth Equity Curve</h2>
+          </div>
+          <span class="text-[9px] uppercase tracking-wider font-semibold text-slate-500 font-mono">Telemetry Analytics</span>
         </div>
+        <div class="w-full flex-1 min-h-[220px] pt-2 relative">
+          <canvas id="equityChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Live Order Feed Streams Sidebar -->
+      <div class="liquid-glass p-3 sm:p-5 rounded-3xl flex flex-col h-[280px] lg:h-auto lg:max-h-[440px]">
+        <div class="flex items-center justify-between border-b border-white/5 pb-2 mb-2">
+          <span class="text-xs font-semibold text-slate-300 tracking-tight flex items-center gap-2"><i data-lucide="terminal" class="w-3.5 h-3.5 text-slate-400"></i> Execution Stream</span>
+          <span id="sidebar-count" class="text-[9px] bg-white/5 border border-white/10 px-2.5 py-0.5 rounded-full font-mono text-slate-400">0</span>
+        </div>
+        <div id="trade-stream" class="space-y-1.5 overflow-y-auto flex-1 pr-1 text-xs"></div>
+      </div>
     </main>
+  </div>
 
-    <footer class="max-w-7xl mx-auto border-t border-slate-900 mt-16 py-8 text-center text-[11px] text-slate-500 space-y-2">
-        <p class="font-bold tracking-wide uppercase text-slate-400">&copy; 2026 Darren's Systems Suite. All Rights Reserved.</p>
-        <p class="text-slate-600 max-w-md mx-auto px-4">
-            Trading financial instruments carries high risk. This matrix is built purely as a discipline checklist helper tool and is not financial asset guidance.
-        </p>
-    </footer>
+  <!-- Smooth Liquid Glass iOS Navigation Dock -->
+  <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[92%] max-w-sm rounded-full liquid-dock p-2 flex items-center justify-between">
+    <button id="nav-calendar-btn" onclick="switchActiveTab('calendar')" class="flex flex-col items-center gap-0.5 flex-1 text-white transition cursor-pointer opacity-100">
+      <i data-lucide="calendar" class="w-4 h-4"></i>
+      <span class="text-[9px] font-medium tracking-tight">Calendar</span>
+    </button>
+    
+    <button onclick="openModal()" class="flex items-center justify-center bg-white text-slate-950 w-10 h-10 rounded-full shadow-xl hover:scale-105 active:scale-95 transition cursor-pointer -mt-5 border-4 border-[#1c1f2e]">
+      <i data-lucide="plus" class="w-5 h-5 stroke-[2.5]"></i>
+    </button>
+    
+    <button id="nav-graph-btn" onclick="switchActiveTab('graph')" class="flex flex-col items-center gap-0.5 flex-1 text-slate-500 hover:text-white transition cursor-pointer opacity-60">
+      <i data-lucide="line-chart" class="w-4 h-4"></i>
+      <span class="text-[9px] font-medium tracking-tight">Analytics</span>
+    </button>
+  </div>
 
-    <div id="lightbox-modal" onclick="closeLightbox()" class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 cursor-pointer">
-        <div class="relative max-w-4xl max-h-screen">
-            <img id="lightbox-img" src="" alt="screenshot zoomed preview" class="max-w-full max-h-[85vh] rounded-xl border border-slate-800 object-contain shadow-2xl" />
-            <span class="absolute top-3 right-3 bg-slate-950/80 hover:bg-slate-950 text-slate-400 hover:text-slate-100 p-2 rounded-full border border-slate-850 text-xs font-semibold">Close [ESC]</span>
+  <!-- Input Recording Modal Plate Sheet -->
+  <div id="trade-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-md">
+    <div class="liquid-glass w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl border border-white/10 max-h-[90vh] overflow-y-auto">
+      <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+        <h4 class="font-medium text-xs text-slate-200 tracking-tight flex items-center gap-2"><i data-lucide="database" class="w-3.5 h-3.5 text-slate-400"></i> New Data Entry</h4>
+        <button onclick="closeModal()" class="p-1 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <form id="trade-form" onsubmit="saveTrade(event)" class="p-4 space-y-3 text-xs">
+        <div>
+          <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Execution Date</label>
+          <input type="date" id="form-date" required class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-3 py-2.5 focus:outline-none focus:border-white/10 text-white text-sm">
         </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Asset Token</label>
+            <input type="text" id="form-asset" placeholder="GBPUSD" required class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-3 py-2.5 focus:outline-none focus:border-white/10 uppercase text-white text-sm">
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Confluence Tag</label>
+            <input type="text" id="form-tag" placeholder="Asia Sweep" class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-3 py-2.5 focus:outline-none focus:border-white/10 text-white text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Net Outcome Net P&L ($)</label>
+          <input type="number" step="0.01" id="form-pnl" placeholder="0.00" required class="w-full bg-slate-950/40 border border-white/5 rounded-2xl px-3 py-2.5 focus:outline-none focus:border-white/10 text-white text-sm">
+        </div>
+        <div>
+          <label class="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Setup Screenshot</label>
+          <div class="relative w-full bg-slate-950/40 border border-white/5 rounded-2xl p-2 min-h-[50px] flex flex-col items-center justify-center border-dashed border-white/10 hover:border-white/20 transition group">
+            <input type="file" id="form-image" accept="image/*" onchange="previewFormImage(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+            <!-- Dynamic Inline Image Frame Replacing File Text Specimen -->
+            <div id="modal-preview-zone" class="w-full text-center text-slate-400 pointer-events-none flex flex-col items-center justify-center gap-1.5 py-1">
+              <i data-lucide="image-plus" class="w-4 h-4 text-slate-500"></i>
+              <span class="text-[10px]">Tap to upload chart file</span>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="w-full bg-white text-slate-950 font-medium py-3 rounded-2xl hover:bg-slate-200 transition cursor-pointer shadow-lg font-semibold text-sm">
+          Log Entry
+        </button>
+      </form>
     </div>
+  </div>
 
-    <script>
-        let rows = [
-            { id: '1', name: 'Trend Direction', desc: 'Is the higher-timeframe trend aligned with your direction?', weight: 20 },
-            { id: '2', name: 'At AOI / Rejected', desc: 'Price action interacting with Area of Interest (Support/Resistance, Orderblocks)', weight: 20 },
-            { id: '3', name: 'Candlestick Rejection at AOI', desc: 'Pinbars, engulfing patterns, or rejection wicks at key levels', weight: 15 },
-            { id: '4', name: 'EMA Rejection', desc: 'Price bouncing or rejecting off key EMAs (e.g., 9, 21, 50, 200)', weight: 12 },
-            { id: '5', name: 'Liquidity Sweep / Hunt', desc: 'Previous session high/low, daily high/low, or equal levels swept', weight: 15 },
-            { id: '6', name: 'Session Timing Filter', desc: 'Is setup developing inside London or New York premium killzones?', weight: 10 },
-            { id: '7', name: 'Risk-to-Reward Model', desc: 'Mechanical risk reward structure reaches a minimum metric of 1:3 RR', weight: 8 }
-        ];
+  <!-- Day Details Popup Modal Sheet -->
+  <div id="details-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/60 backdrop-blur-md">
+    <div class="liquid-glass w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-white/10 max-h-[90vh] flex flex-col">
+      <div class="p-4 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+        <h4 id="details-title" class="font-medium text-xs text-slate-200 tracking-tight flex items-center gap-2"><i data-lucide="info" class="w-3.5 h-3.5 text-slate-400"></i> Day Matrix Audit</h4>
+        <button onclick="closeDetailsModal()" class="p-1 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition cursor-pointer"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="details-content" class="p-4 space-y-3.5 overflow-y-auto flex-1 text-xs"></div>
+    </div>
+  </div>
 
-        const timeframes = [
-            { id: 'W', name: 'Weekly', weight: 0.25 },
-            { id: 'D', name: 'Daily', weight: 0.25 },
-            { id: '4H', name: '4 Hour', weight: 0.20 },
-            { id: '2H', name: '2 Hour', weight: 0.12 },
-            { id: '1H', name: '1 Hour', weight: 0.10 },
-            { id: '30M', name: '30 Min', weight: 0.08 }
-        ];
+  <!-- Immersive iPhone-Style Full Screen Lightbox Modal -->
+  <div id="lightbox-modal" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 backdrop-blur-xl animate-fade-in transition-all duration-300">
+    <button onclick="closeLightbox()" class="absolute top-6 right-6 z-50 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/10 text-white rounded-full transition shadow-xl backdrop-blur-md cursor-pointer">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+    <div class="w-full h-full p-4 flex items-center justify-center select-none">
+      <img id="lightbox-img" src="" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-white/5" alt="Expanded Layout View">
+    </div>
+  </div>
 
-        const availableTriggers = ['Engulfing Candle', 'Doji', 'Hammer', 'Morning Star', 'Evening Star', 'MSS/BOS Choch', 'FVG Mitigation'];
+  <script>
+    // Rigid Core System Clock Syncing Constants Set Exactly to July 5, 2026
+    const systemYear = 2026;
+    const systemMonth = 6; // July (0-indexed)
+    const systemDay = 5;
+    
+    // Dynamic system values for performance percentage yield baseline metrics
+    let accountBaseMetric = parseFloat(localStorage.getItem('koce_account_base')) || 10000; 
 
-        let matrix = {}; 
-        let tradeBias = 'LONG'; 
-        let ticker = 'BTCUSD';
-        let selectedTriggers = [];
+    let trades = JSON.parse(localStorage.getItem('koce_executive_trades')) || [];
+    let currentDate = new Date(systemYear, systemMonth, systemDay);
+    let chartInstance = null;
 
-        let journalEntries = []; 
-        let journalFilter = 'ALL'; 
-        let currentUploadedImages = []; 
-        let editingJournalId = null; 
+    // Currency System States
+    let currentCurrency = 'USD';
+    let fxRate = parseFloat(localStorage.getItem('koce_fx_rate')) || 129.50;
 
-        let calendarDate = new Date(); 
-        let dailyProfits = {}; 
-        let selectedCalDayOutcomeVal = 'WIN'; 
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('current-date-badge').innerText = `July 5, 2026`;
+      document.getElementById('account-base-input').value = accountBaseMetric;
+      document.getElementById('exchange-rate-input').value = fxRate.toFixed(2);
+      
+      // Keep real-time runtime monitoring checks going every second
+      setInterval(syncSystemCalendarTime, 1000);
+      
+      lucide.createIcons();
+      renderDashboard();
+    });
 
-        function initMatrix() {
-            rows.forEach(row => {
-                matrix[row.id] = {};
-                timeframes.forEach(tf => {
-                    matrix[row.id][tf.id] = false;
-                });
-            });
+    // Real-Time Calendar Auto Updates
+    function syncSystemCalendarTime() {
+      const now = new Date();
+      // Only forces matrix redraws if structural cross-over triggers
+      if (now.getDate() !== currentDate.getDate() && now.getFullYear() === systemYear && now.getMonth() === systemMonth) {
+        renderCalendar();
+      }
+    }
+
+    // Formatting Tool to compact values 1000 and above into K notation
+    function formatValueK(num) {
+      const absoluteValue = Math.abs(num);
+      if (absoluteValue >= 1000) {
+        const formatted = (num / 1000).toFixed(2);
+        return parseFloat(formatted) + 'K';
+      }
+      return num.toFixed(2);
+    }
+
+    // Helper to fetch value based on currency toggle state
+    function convertValue(usdAmount) {
+      if (currentCurrency === 'KES') {
+        return usdAmount * fxRate;
+      }
+      return usdAmount;
+    }
+
+    // Currency prefixing helper
+    function getCurrencySymbol() {
+      return currentCurrency === 'KES' ? 'Ksh ' : '$';
+    }
+
+    function toggleCurrency(currency) {
+      currentCurrency = currency;
+      const usdBtn = document.getElementById('currency-usd-btn');
+      const kesBtn = document.getElementById('currency-kes-btn');
+      const label = document.getElementById('capital-currency-label');
+      
+      if (currency === 'USD') {
+        usdBtn.className = "px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer bg-white text-slate-950";
+        kesBtn.className = "px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer text-slate-400 hover:text-white";
+        label.innerText = "USD";
+      } else {
+        kesBtn.className = "px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer bg-white text-slate-950";
+        usdBtn.className = "px-2.5 py-1 text-[10px] font-bold tracking-wider rounded-xl transition duration-200 cursor-pointer text-slate-400 hover:text-white";
+        label.innerText = "KES";
+      }
+      renderDashboard();
+    }
+
+    function updateExchangeRate(value) {
+      let parsed = parseFloat(value);
+      if (!isNaN(parsed) && parsed > 0) {
+        fxRate = parsed;
+        localStorage.setItem('koce_fx_rate', fxRate);
+        renderDashboard();
+      }
+    }
+
+    function updateBaseCapital(value) {
+      let parsed = parseFloat(value);
+      if (!isNaN(parsed) && parsed > 0) {
+        accountBaseMetric = parsed;
+        localStorage.setItem('koce_account_base', accountBaseMetric);
+        renderDashboard();
+      }
+    }
+
+    function renderDashboard() {
+      renderStats();
+      renderCalendar();
+      renderStream();
+      if (!document.getElementById('view-graph').classList.contains('hidden')) {
+        renderGraph();
+      }
+      lucide.createIcons();
+    }
+
+    function switchActiveTab(targetView) {
+      const calendarView = document.getElementById('view-calendar');
+      const graphView = document.getElementById('view-graph');
+      const calBtn = document.getElementById('nav-calendar-btn');
+      const graphBtn = document.getElementById('nav-graph-btn');
+
+      if (targetView === 'calendar') {
+        calendarView.classList.remove('hidden');
+        graphView.classList.add('hidden');
+        calBtn.className = "flex flex-col items-center gap-0.5 flex-1 text-white transition opacity-100 cursor-pointer";
+        graphBtn.className = "flex flex-col items-center gap-0.5 flex-1 text-slate-500 hover:text-white transition opacity-60 cursor-pointer";
+      } else {
+        calendarView.classList.add('hidden');
+        graphView.classList.remove('hidden');
+        graphBtn.className = "flex flex-col items-center gap-0.5 flex-1 text-white transition opacity-100 cursor-pointer";
+        calBtn.className = "flex flex-col items-center gap-0.5 flex-1 text-slate-500 hover:text-white transition opacity-60 cursor-pointer";
+        renderGraph();
+      }
+    }
+
+    function renderStats() {
+      const total = trades.length;
+      document.getElementById('stat-total').innerText = `${total} Log${total === 1 ? '' : 's'}`;
+
+      // Dynamic Target metrics updates
+      const targetInUSD = accountBaseMetric * 0.02;
+      const convertedTarget = convertValue(targetInUSD);
+      document.getElementById('target-baseline-label').innerText = `(Target: ${getCurrencySymbol()}${formatValueK(convertedTarget)})`;
+
+      if (total === 0) {
+        document.getElementById('stat-winrate').innerText = '0%';
+        document.getElementById('stat-netprofit').innerText = getCurrencySymbol() + '0.00';
+        document.getElementById('stat-netprofit').className = "text-xl sm:text-2xl font-semibold text-slate-400 tracking-tight";
+        document.getElementById('stat-profitfactor').innerText = '0.00';
+        document.getElementById('stat-weeklygoal').innerText = '0.00%';
+        document.getElementById('stat-weeklygoal').className = "text-xl sm:text-2xl font-semibold text-slate-400 tracking-tight block";
+        return;
+      }
+
+      let netProfit = 0;
+      let wins = 0;
+      let totalGrossGains = 0;
+      let totalGrossLosses = 0;
+
+      trades.forEach(t => {
+        netProfit += t.pnl;
+        if (t.pnl > 0) {
+          wins++;
+          totalGrossGains += t.pnl;
+        } else {
+          totalGrossLosses += Math.abs(t.pnl);
+        }
+      });
+
+      const winrate = Math.round((wins / total) * 100);
+      const profitFactor = totalGrossLosses === 0 ? totalGrossGains.toFixed(2) : (totalGrossGains / totalGrossLosses).toFixed(2);
+
+      document.getElementById('stat-winrate').innerText = `${winrate}%`;
+      document.getElementById('stat-profitfactor').innerText = profitFactor;
+      
+      const profitNode = document.getElementById('stat-netprofit');
+      profitNode.innerText = `${netProfit >= 0 ? '+' : ''}${getCurrencySymbol()}${formatValueK(convertValue(netProfit))}`;
+      profitNode.className = `text-xl sm:text-2xl font-semibold tracking-tight ${netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      // Dynamic Performance Computation Core for Weekly Target Goals
+      const weeklyReturnPercent = (netProfit / accountBaseMetric) * 100;
+      const goalNode = document.getElementById('stat-weeklygoal');
+      goalNode.innerText = `${weeklyReturnPercent >= 0 ? '+' : ''}${weeklyReturnPercent.toFixed(2)}%`;
+      
+      if (weeklyReturnPercent >= 2.0) {
+        goalNode.className = "text-xl sm:text-2xl font-bold tracking-tight text-emerald-400 animate-pulse block";
+      } else if (weeklyReturnPercent >= 0) {
+        goalNode.className = "text-xl sm:text-2xl font-semibold tracking-tight text-slate-200 block";
+      } else {
+        goalNode.className = "text-xl sm:text-2xl font-semibold tracking-tight text-rose-400 block";
+      }
+    }
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      const monthsArray = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      document.getElementById('calendar-month-year').innerText = `${monthsArray[month]} ${year}`;
+
+      const gridContainer = document.getElementById('calendar-grid');
+      gridContainer.innerHTML = '';
+
+      const firstDayIndex = new Date(year, month, 1).getDay();
+      const totalDays = new Date(year, month + 1, 0).getDate();
+
+      for (let i = 0; i < firstDayIndex; i++) {
+        const spacer = document.createElement('div');
+        gridContainer.appendChild(spacer);
+      }
+
+      for (let day = 1; day <= totalDays; day++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = "p-1.5 rounded-2xl border border-white/[0.02] bg-white/[0.01] flex flex-col justify-between items-start min-h-[50px] sm:min-h-[60px] transition text-[9px]";
+        
+        const dayString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const daysTrades = trades.filter(t => t.date === dayString);
+
+        let dailyPnl = 0;
+        daysTrades.forEach(t => dailyPnl += t.pnl);
+
+        const dayNumSpan = document.createElement('span');
+        dayNumSpan.className = "font-medium text-slate-500";
+        dayNumSpan.innerText = day;
+        dayCell.appendChild(dayNumSpan);
+
+        if (year === systemYear && month === systemMonth && day === systemDay) {
+          dayCell.classList.add('today-ring');
+          dayNumSpan.className = "font-bold text-white flex items-center gap-1";
+          dayNumSpan.innerHTML = `${day} <span class="w-1.5 h-1.5 bg-white rounded-full"></span>`;
         }
 
-        initMatrix();
+        if (daysTrades.length > 0) {
+          const pnlText = document.createElement('span');
+          pnlText.className = `font-semibold mt-1 tracking-tight self-end text-[8px] sm:text-[9px] ${dailyPnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+          pnlText.innerText = `${dailyPnl >= 0 ? '+' : ''}${formatValueK(convertValue(dailyPnl))}`;
+          dayCell.appendChild(pnlText);
+          dayCell.classList.add(dailyPnl >= 0 ? 'profit-glow' : 'loss-glow');
+          
+          dayCell.classList.add('cursor-pointer', 'hover:border-white/20');
+          dayCell.setAttribute('onclick', `openDetailsModal('${dayString}')`);
+        } else {
+          dayCell.classList.add('cursor-pointer', 'hover:bg-white/[0.03]');
+          dayCell.setAttribute('onclick', `openDirectEntry('${dayString}')`);
+        }
 
-        function showNotification(text, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            let colorClasses = "border-emerald-500 bg-emerald-950/90 text-emerald-300";
-            let icon = "check";
+        gridContainer.appendChild(dayCell);
+      }
+    }
 
-            if (type === 'error') {
-                colorClasses = "border-rose-500 bg-rose-950/90 text-rose-300";
-                icon = "alert-circle";
-            } else if (type === 'info') {
-                colorClasses = "border-cyan-500 bg-cyan-950/90 text-cyan-300";
-                icon = "info";
+    function openDirectEntry(dateString) {
+      openModal();
+      document.getElementById('form-date').value = dateString;
+    }
+
+    function previewFormImage(event) {
+      const file = event.target.files[0];
+      const previewZone = document.getElementById('modal-preview-zone');
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewZone.innerHTML = `<img src="${e.target.result}" class="w-full h-auto max-h-[80px] object-cover rounded-xl border border-white/10" alt="Preview spec">`;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function openDetailsModal(dateString) {
+      const daysTrades = trades.filter(t => t.date === dateString);
+      if (daysTrades.length === 0) return;
+
+      const titleNode = document.getElementById('details-title');
+      const contentNode = document.getElementById('details-content');
+      
+      const [y, m, d] = dateString.split('-');
+      const dateObj = new Date(y, m - 1, d);
+      titleNode.innerText = dateObj.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+      
+      contentNode.innerHTML = '';
+      daysTrades.forEach(t => {
+        const card = document.createElement('div');
+        card.className = "p-3 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col gap-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="font-bold uppercase text-slate-200 tracking-wide">${t.asset}</span>
+            <span class="font-mono font-semibold ${t.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+              ${t.pnl >= 0 ? '+' : ''}${getCurrencySymbol()}${formatValueK(convertValue(t.pnl))}
+            </span>
+          </div>
+          <div class="flex flex-col gap-2 mt-0.5">
+            <span class="text-[9px] bg-white/5 border border-white/10 text-slate-300 font-mono px-2.5 py-0.5 rounded-full flex items-center gap-1 self-start">
+              <span class="w-1 h-1 ${t.pnl >= 0 ? 'bg-emerald-400' : 'bg-rose-400'} rounded-full"></span>
+              Confluence: ${t.tag ? t.tag : 'No Tag Provided'}
+            </span>
+            ${t.image ? `<div class="mt-1 border border-white/10 rounded-xl overflow-hidden bg-black/40 cursor-pointer active:scale-99 transition duration-200 shadow-inner" onclick="launchLightbox('${t.image}')"><img src="${t.image}" class="w-full h-auto object-contain max-h-[360px] mx-auto" alt="Setup Specimen"></div>` : ''}
+          </div>
+        `;
+        contentNode.appendChild(card);
+      });
+
+      document.getElementById('details-modal').classList.remove('hidden');
+    }
+
+    function closeDetailsModal() {
+      document.getElementById('details-modal').classList.add('hidden');
+    }
+
+    function launchLightbox(imgSrc) {
+      const lightbox = document.getElementById('lightbox-modal');
+      const lightboxImg = document.getElementById('lightbox-img');
+      lightboxImg.src = imgSrc;
+      lightbox.classList.remove('hidden');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox-modal').classList.add('hidden');
+      document.getElementById('lightbox-img').src = '';
+    }
+
+    function renderStream() {
+      const stream = document.getElementById('trade-stream');
+      document.getElementById('sidebar-count').innerText = trades.length;
+      stream.innerHTML = '';
+
+      if (trades.length === 0) {
+        stream.innerHTML = `
+          <div class="text-center py-12 text-slate-600 flex flex-col items-center gap-2">
+            <i data-lucide="fingerprint" class="w-5 h-5 opacity-30"></i>
+            <p class="text-[9px] tracking-wider uppercase font-semibold">Ready for System Records</p>
+          </div>`;
+        return;
+      }
+
+      const sorted = [...trades].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+      sorted.forEach(t => {
+        const item = document.createElement('div');
+        item.className = "p-3 bg-white/[0.01] border border-white/5 rounded-2xl flex items-center justify-between group hover:bg-white/[0.03] transition cursor-pointer";
+        item.setAttribute('onclick', `openDetailsModal('${t.date}')`);
+        item.innerHTML = `
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold text-slate-200 uppercase tracking-wide">${t.asset}</span>
+              ${t.tag ? `<span class="text-[8px] text-slate-500 font-mono bg-white/5 px-1.5 py-0.5 rounded-full">:${t.tag}</span>` : ''}
+              ${t.image ? `<i data-lucide="image" class="w-3 h-3 text-emerald-400 inline"></i>` : ''}
+            </div>
+            <p class="text-[9px] text-slate-500">${t.date}</p>
+          </div>
+          <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <span class="font-semibold tracking-tight ${t.pnl >= 0 ? 'text-emerald-400' : 'text-rose-400'}">
+              ${t.pnl >= 0 ? '+' : ''}${getCurrencySymbol()}${formatValueK(convertValue(t.pnl))}
+            </span>
+            <button onclick="deleteTrade('${t.id}')" class="text-slate-600 hover:text-rose-400 transition cursor-pointer opacity-100 p-1">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        stream.appendChild(item);
+      });
+    }
+
+    function renderGraph() {
+      const ctx = document.getElementById('equityChart').getContext('2d');
+      
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+
+      const chronologicalTrades = [...trades].sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      let runningBalance = 0;
+      const dataPoints = [0];
+      const labels = ["Start"];
+
+      chronologicalTrades.forEach((t, index) => {
+        runningBalance += t.pnl;
+        dataPoints.push(convertValue(runningBalance));
+        labels.push(`${t.asset} (#${index + 1})`);
+      });
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Net Balance',
+            data: dataPoints,
+            borderColor: '#ffffff',
+            borderWidth: 2,
+            pointBackgroundColor: '#ffffff',
+            pointRadius: labels.length > 15 ? 0 : 3,
+            tension: 0.2,
+            fill: true,
+            backgroundColor: (context) => {
+              const chart = context.chart;
+              const {ctx, chartArea} = chart;
+              if (!chartArea) return null;
+              const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+              gradient.addColorStop(0, 'rgba(255,255,255,0.06)');
+              gradient.addColorStop(1, 'rgba(255,255,255,0.00)');
+              return gradient;
             }
-
-            toast.className = `flex items-center gap-3 border px-4 py-3 rounded-xl shadow-2xl backdrop-blur max-w-sm w-80 translate-y-5 opacity-0 transition-all duration-300 pointer-events-auto ${colorClasses}`;
-            toast.innerHTML = `
-                <i data-lucide="${icon}" class="h-5 w-5 shrink-0"></i>
-                <div class="text-xs font-bold tracking-wide">${text}</div>
-            `;
-            container.appendChild(toast);
-            lucide.createIcons();
-
-            setTimeout(() => {
-                toast.classList.remove('translate-y-5', 'opacity-0');
-            }, 10);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 4500);
-        }
-
-        function switchTab(targetTab) {
-            const tabs = ['matrix', 'journal', 'calendar'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                const page = document.getElementById(`page-content-${t}`);
-                
-                if (t === targetTab) {
-                    btn.className = "flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-cyan-400 bg-cyan-950/50 border border-cyan-500/20 shadow";
-                    page.classList.remove('hidden');
-                } else {
-                    btn.className = "flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800";
-                    page.classList.add('hidden');
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { 
+              grid: { display: false },
+              ticks: { color: '#64748b', font: { size: 9 } }
+            },
+            y: { 
+              grid: { color: 'rgba(255,255,255,0.03)' },
+              ticks: { 
+                color: '#64748b', 
+                font: { size: 9 },
+                callback: function(value) {
+                  return getCurrencySymbol() + formatValueK(value);
                 }
-            });
-
-            if (targetTab === 'journal') renderJournalFeed();
-            if (targetTab === 'calendar') renderCalendar();
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('confluence-table-body');
-            tbody.innerHTML = '';
-
-            rows.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-900/20 transition-colors group';
-
-                let rowInfoHtml = `
-                    <td class="py-4 px-4 pr-2">
-                        <div class="font-bold text-xs text-slate-200 group-hover:text-cyan-300 transition-colors">${row.name}</div>
-                        <div class="text-[10px] text-slate-500 mt-0.5 leading-relaxed font-medium max-w-xs">${row.desc}</div>
-                    </td>
-                `;
-
-                let rowChecksHtml = '';
-                timeframes.forEach(tf => {
-                    const isChecked = matrix[row.id] ? matrix[row.id][tf.id] : false;
-                    let buttonClass = isChecked 
-                        ? "bg-cyan-400 border-cyan-400 shadow-lg shadow-cyan-400/20 text-slate-950" 
-                        : "bg-slate-950 border-slate-800 text-transparent hover:border-slate-700 hover:bg-slate-900";
-
-                    rowChecksHtml += `
-                        <td class="p-2 border-l border-slate-900/50 text-center">
-                            <div class="flex items-center justify-center">
-                                <button type="button" onclick="toggleCheck('${row.id}', '${tf.id}')" class="w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-200 ${buttonClass}" >
-                                    <i data-lucide="check" class="h-5 w-5 stroke- transition-transform ${isChecked ? 'scale-100 text-slate-950' : 'scale-0'}"></i>
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                });
-
-                tr.innerHTML = rowInfoHtml + rowChecksHtml;
-                tbody.appendChild(tr);
-            });
-
-            const trSummary = document.createElement('tr');
-            trSummary.className = 'bg-slate-950/80 border-t-2 border-slate-800';
-            let summaryRowHtml = `
-                <td class="py-4 px-4 font-bold text-xs text-slate-300">
-                    Timeframe Score Accuracy:
-                </td>
-            `;
-
-            timeframes.forEach(tf => {
-                summaryRowHtml += `
-                    <td class="py-3 px-2 text-center border-l border-slate-900/50">
-                        <div class="inline-flex flex-col items-center justify-center p-2 rounded-lg border w-full max-w-[90px] bg-slate-900 border-slate-800 text-slate-400">
-                            <span id="score-tf-${tf.id}" class="text-sm font-black tracking-tighter">0%</span>
-                            <span class="text-[8px] text-slate-500 uppercase font-semibold">confluence</span>
-                        </div>
-                    </td>
-                `;
-            });
-            trSummary.innerHTML = summaryRowHtml;
-            tbody.appendChild(trSummary);
-
-            lucide.createIcons();
-        }
-
-        function renderTriggers() {
-            const container = document.getElementById('entry-triggers-container');
-            container.innerHTML = '';
-
-            availableTriggers.forEach(trigger => {
-                const isSelected = selectedTriggers.includes(trigger);
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.onclick = () => toggleTrigger(trigger);
-
-                if (isSelected) {
-                    button.className = 'px-3 py-1.5 rounded-lg text-xs font-black bg-gradient-to-r from-cyan-600 to-teal-600 text-slate-950 shadow transition-all duration-200 scale-95';
-                } else {
-                    button.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-950 border border-slate-850 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all';
-                }
-                button.innerText = trigger;
-                container.appendChild(button);
-            });
-        }
-
-        function renderWeightEditor() {
-            const list = document.getElementById('weight-editor-list');
-            list.innerHTML = '';
-
-            rows.forEach(row => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between bg-slate-950 border border-slate-850 p-2 rounded-lg text-xs gap-3';
-                div.innerHTML = `
-                    <span class="font-bold text-slate-300 truncate max-w-[160px]">${row.name}</span>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        <input type="number" value="${row.weight}" onchange="changeWeight('${row.id}', this.value)" class="w-12 bg-slate-900 border border-slate-800 rounded p-1 text-center font-bold text-cyan-400" />
-                        <span class="text-slate-500 font-medium">%</span>
-                        <button type="button" onclick="deleteCustomRow('${row.id}')" class="p-1 hover:text-rose-400 text-slate-600 transition" title="Delete metric row">
-                            <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
-                        </button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-            lucide.createIcons();
-        }
-
-        function calculateAllScores() {
-            const totalWeight = rows.reduce((acc, r) => acc + Number(r.weight), 0);
-            document.getElementById('label-total-weight').innerText = `Total Weight: ${totalWeight}%`;
-            
-            if(totalWeight !== 100) {
-                document.getElementById('label-total-weight').className = "text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400";
-            } else {
-                document.getElementById('label-total-weight').className = "text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400";
+              }
             }
-
-            let overallScoreSum = 0;
-            let totalWeightMultiplier = 0;
-
-            timeframes.forEach(tf => {
-                let tfEarnedWeight = 0;
-                rows.forEach(row => {
-                    if (matrix[row.id] && matrix[row.id][tf.id]) {
-                        tfEarnedWeight += Number(row.weight);
-                    }
-                });
-
-                const tfPercentScore = totalWeight > 0 ? Math.round((tfEarnedWeight / totalWeight) * 100) : 0;
-                
-                const node = document.getElementById(`score-tf-${tf.id}`);
-                if (node) {
-                    node.innerText = `${tfPercentScore}%`;
-                    if (tfPercentScore >= 80) node.className = "text-sm font-black tracking-tighter text-emerald-400";
-                    else if (tfPercentScore >= 50) node.className = "text-sm font-black tracking-tighter text-cyan-400";
-                    else if (tfPercentScore > 0) node.className = "text-sm font-black tracking-tighter text-amber-400";
-                    else node.className = "text-sm font-black tracking-tighter text-slate-500";
-                }
-
-                overallScoreSum += tfPercentScore * tf.weight;
-                totalWeightMultiplier += tf.weight;
-            });
-
-            const combinedScore = totalWeightMultiplier > 0 ? Math.round(overallScoreSum / totalWeightMultiplier) : 0;
-            
-            const textEl = document.getElementById('score-text');
-            const gaugeCircle = document.getElementById('gauge-progress');
-            textEl.innerText = `${combinedScore}%`;
-
-            const circumference = 251.2;
-            const strokeDashoffset = circumference - (combinedScore / 100) * circumference;
-            gaugeCircle.style.strokeDashoffset = strokeDashoffset;
-
-            if (combinedScore >= 85) {
-                gaugeCircle.style.stroke = "#10b981"; 
-                textEl.className = "text-4xl font-black text-emerald-400 tracking-tighter";
-            } else if (combinedScore >= 70) {
-                gaugeCircle.style.stroke = "#06b6d4"; 
-                textEl.className = "text-4xl font-black text-cyan-400 tracking-tighter";
-            } else if (combinedScore >= 50) {
-                gaugeCircle.style.stroke = "#f59e0b"; 
-                textEl.className = "text-4xl font-black text-amber-400 tracking-tighter";
-            } else {
-                gaugeCircle.style.stroke = "#ef4444"; 
-                textEl.className = "text-4xl font-black text-rose-500 tracking-tighter";
-            }
-
-            const rankCard = document.getElementById('rank-card');
-            const rankIcon = document.getElementById('rank-icon');
-            const rankName = document.getElementById('rank-name');
-            const rankDesc = document.getElementById('rank-desc');
-
-            if (combinedScore >= 85) {
-                rankCard.className = "p-4 rounded-xl border border-emerald-500/20 bg-emerald-950/20 space-y-2";
-                rankIcon.className = "h-4 w-4 text-emerald-400";
-                rankIcon.setAttribute('data-lucide', 'shield-check');
-                rankName.className = "text-sm font-black uppercase tracking-wider text-emerald-400";
-                rankName.innerText = "A+ Elite Variable Setup";
-                rankDesc.innerText = "Full multi-timeframe directional matching. High probability statistical execution criteria met.";
-            } else if (combinedScore >= 70) {
-                rankCard.className = "p-4 rounded-xl border border-cyan-500/20 bg-cyan-950/20 space-y-2";
-                rankIcon.className = "h-4 w-4 text-cyan-400";
-                rankIcon.setAttribute('data-lucide', 'award');
-                rankName.className = "text-sm font-black uppercase tracking-wider text-cyan-400";
-                rankName.innerText = "A-Grade Strategy Match";
-                rankDesc.innerText = "Solid systematic checklist correlation. Favorable deployment environment ready.";
-            } else if (combinedScore >= 50) {
-                rankCard.className = "p-4 rounded-xl border border-amber-500/20 bg-amber-950/20 space-y-2";
-                rankIcon.className = "h-4 w-4 text-amber-400";
-                rankIcon.setAttribute('data-lucide', 'alert-triangle');
-                rankName.className = "text-sm font-black uppercase tracking-wider text-amber-400";
-                rankName.innerText = "B-Grade Suboptimal Model";
-                rankDesc.innerText = "Partial checklist match. Consider cutting size parameter down by 50% to shield capital allocation.";
-            } else {
-                rankCard.className = "p-4 rounded-xl border border-rose-500/10 bg-rose-950/10 space-y-2";
-                rankIcon.className = "h-4 w-4 text-rose-400";
-                rankIcon.setAttribute('data-lucide', 'slash');
-                rankName.className = "text-sm font-black uppercase tracking-wider text-rose-400";
-                rankName.innerText = "No Trade Execution Restricted";
-                rankDesc.innerText = "Parameters fail validation barriers. Do not execute under risk mitigation policies.";
-            }
-
-            document.getElementById('summary-trigger').innerText = selectedTriggers.length > 0 ? selectedTriggers.join(', ') : "No Trigger Selected";
-            const summaryBias = document.getElementById('summary-bias');
-            if (tradeBias === 'LONG') {
-                summaryBias.className = "text-[11px] font-black uppercase flex items-center gap-1 text-emerald-400";
-                summaryBias.innerHTML = `<i data-lucide="trending-up" class="h-3.5 w-3.5"></i> LONG`;
-            } else {
-                summaryBias.className = "text-[11px] font-black uppercase flex items-center gap-1 text-rose-400";
-                summaryBias.innerHTML = `<i data-lucide="trending-down" class="h-3.5 w-3.5"></i> SHORT`;
-            }
-
-            lucide.createIcons();
+          }
         }
-
-        function toggleCheck(rowId, tfId) {
-            if (matrix[rowId]) {
-                matrix[rowId][tfId] = !matrix[rowId][tfId];
-                renderTable();
-                calculateAllScores();
-            }
-        }
-
-        function toggleTrigger(trigger) {
-            const index = selectedTriggers.indexOf(trigger);
-            if (index > -1) {
-                selectedTriggers.splice(index, 1);
-            } else {
-                selectedTriggers.push(trigger);
-            }
-            renderTriggers();
-            calculateAllScores();
-        }
-
-        function resetMatrix() {
-            initMatrix();
-            document.getElementById('text-notes').value = '';
-            selectedTriggers = [];
-            renderTable();
-            renderTriggers();
-            calculateAllScores();
-            showNotification("Confluence matrix successfully reset", "info");
-        }
-
-        function setBias(bias) {
-            tradeBias = bias;
-            const longBtn = document.getElementById('btn-bias-long');
-            const shortBtn = document.getElementById('btn-bias-short');
-
-            if (bias === 'LONG') {
-                longBtn.className = "py-1.5 text-xs font-bold rounded uppercase transition bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                shortBtn.className = "py-1.5 text-xs font-bold rounded uppercase transition text-slate-400 hover:bg-slate-900";
-            } else {
-                shortBtn.className = "py-1.5 text-xs font-bold rounded uppercase transition bg-rose-500/20 text-rose-400 border border-rose-500/30";
-                longBtn.className = "py-1.5 text-xs font-bold rounded uppercase transition text-slate-400 hover:bg-slate-900";
-            }
-            calculateAllScores();
-        }
-
-        function updateTicker(val) {
-            ticker = val.toUpperCase().trim();
-        }
-
-        function updateRiskValue(val) {
-            document.getElementById('label-risk').innerText = `${Number(val).toFixed(2)}%`;
-        }
-
-        function toggleConfigPanel() {
-            const p = document.getElementById('config-panel');
-            p.classList.toggle('hidden');
-        }
-
-        function changeWeight(rowId, val) {
-            const r = rows.find(x => x.id === rowId);
-            if (r) {
-                r.weight = isNaN(parseFloat(val)) ? 0 : parseFloat(val);
-                calculateAllScores();
-            }
-        }
-
-        function addCustomRow() {
-            const nameInput = document.getElementById('new-metric-name');
-            const weightInput = document.getElementById('new-metric-weight');
-            
-            const name = nameInput.value.trim();
-            const weight = parseFloat(weightInput.value);
-
-            if (!name) {
-                showNotification("Please provide a valid metric row text name.", "error");
-                return;
-            }
-
-            const newId = 'custom-' + Date.now();
-            rows.push({
-                id: newId,
-                name: name,
-                desc: 'User created technical deployment variable requirement.',
-                weight: isNaN(weight) ? 0 : weight
-            });
-
-            matrix[newId] = {};
-            timeframes.forEach(tf => {
-                matrix[newId][tf.id] = false;
-            });
-
-            nameInput.value = '';
-            renderTable();
-            renderWeightEditor();
-            calculateAllScores();
-            showNotification(`Added confluence metric: "${name}"`, "success");
-        }
-
-        function deleteCustomRow(id) {
-            rows = rows.filter(x => x.id !== id);
-            delete matrix[id];
-            renderTable();
-            renderWeightEditor();
-            calculateAllScores();
-            showNotification("Confluence row parameter removed", "info");
-        }
-
-        function loadJournalData() {
-            try {
-                const saved = localStorage.getItem('darren_trading_journal');
-                if (saved) {
-                    journalEntries = JSON.parse(saved);
-                } else {
-                    journalEntries = [];
-                }
-            } catch (err) {
-                console.error("Failed to parse journal data", err);
-                journalEntries = [];
-            }
-        }
-
-        function saveJournalToLocalStorage() {
-            try {
-                localStorage.setItem('darren_trading_journal', JSON.stringify(journalEntries));
-            } catch (e) {
-                showNotification("Could not write to local storage. File sizes might be too large.", "error");
-            }
-        }
-
-        function loadFromCurrentMatrix() {
-            document.getElementById('j-ticker').value = ticker || 'BTCUSD';
-            document.getElementById('j-bias').value = tradeBias || 'LONG';
-            
-            const totalWeight = rows.reduce((acc, r) => acc + Number(r.weight), 0);
-            let overallScoreSum = 0;
-            let totalWeightMultiplier = 0;
-
-            timeframes.forEach(tf => {
-                let tfEarnedWeight = 0;
-                rows.forEach(row => {
-                    if (matrix[row.id] && matrix[row.id][tf.id]) {
-                        tfEarnedWeight += Number(row.weight);
-                    }
-                });
-                const tfPercentScore = totalWeight > 0 ? Math.round((tfEarnedWeight / totalWeight) * 100) : 0;
-                overallScoreSum += tfPercentScore * tf.weight;
-                totalWeightMultiplier += tf.weight;
-            });
-            const combinedScore = totalWeightMultiplier > 0 ? Math.round(overallScoreSum / totalWeightMultiplier) : 0;
-            document.getElementById('j-score').value = combinedScore;
-
-            const riskValue = document.getElementById('input-risk').value;
-            document.getElementById('j-risk').value = riskValue;
-
-            const notesVal = document.getElementById('text-notes').value;
-            document.getElementById('j-notes').value = notesVal;
-
-            if (selectedTriggers.length > 0) {
-                document.getElementById('j-notes').value += `\n[Triggers Active]: ${selectedTriggers.join(', ')}`;
-            }
-
-            showNotification("Successfully synchronized form with active checklist data", "success");
-        }
-
-        function prefillJournalEntryFromMatrix() {
-            switchTab('journal');
-            loadFromCurrentMatrix();
-        }
-
-        function toggleJournalOutcomeStyling() {
-            const outcome = document.getElementById('j-outcome').value;
-            const pnlLabel = document.getElementById('j-pnl-label');
-            const pnlInput = document.getElementById('j-pnl');
-
-            if (outcome === 'WIN') {
-                pnlLabel.className = "text-emerald-400 uppercase font-black tracking-widest text-[10px]";
-                pnlInput.className = "w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-emerald-400 font-bold outline-none focus:border-cyan-500";
-                if(!pnlInput.value.startsWith('+') && pnlInput.value !== '') {
-                    pnlInput.value = '+' + pnlInput.value.replace(/^-/, '');
-                }
-            } else if (outcome === 'LOSS') {
-                pnlLabel.className = "text-rose-400 uppercase font-black tracking-widest text-[10px]";
-                pnlInput.className = "w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-rose-400 font-bold outline-none focus:border-cyan-500";
-                if(!pnlInput.value.startsWith('-') && pnlInput.value !== '') {
-                    pnlInput.value = '-' + pnlInput.value.replace(/^\+/, '');
-                }
-            } else {
-                pnlLabel.className = "text-slate-400 uppercase font-black tracking-widest text-[10px]";
-                pnlInput.className = "w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-slate-300 font-bold outline-none focus:border-cyan-500";
-            }
-        }
-
-        function handleImageUpload(event) {
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
-            
-            const filesToProcess = Array.from(files).slice(0, 2);
-            currentUploadedImages = [];
-            
-            document.getElementById('preview-wrapper-0').classList.add('hidden');
-            document.getElementById('preview-wrapper-1').classList.add('hidden');
-            
-            let processedCount = 0;
-            
-            filesToProcess.forEach((file, index) => {
-                if (!file.type.startsWith('image/')) {
-                    showNotification("Invalid file type detected. Please upload standard image files.", "error");
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        
-                        const MAX_WIDTH = 800;
-                        if (width > MAX_WIDTH) {
-                            height = Math.round((height * MAX_WIDTH) / width);
-                            width = MAX_WIDTH;
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-                        currentUploadedImages.push(compressedBase64);
-                        
-                        const wrapper = document.getElementById(`preview-wrapper-${index}`);
-                        const previewImg = document.getElementById(`uploader-preview-img-${index}`);
-                        
-                        if (wrapper && previewImg) {
-                            wrapper.classList.remove('hidden');
-                            previewImg.src = compressedBase64;
-                        }
-                        
-                        processedCount++;
-                        if (processedCount === filesToProcess.length) {
-                            document.getElementById('uploader-placeholder').classList.add('hidden');
-                            document.getElementById('uploader-preview-container').classList.remove('hidden');
-                            showNotification(`Uploaded and optimized ${currentUploadedImages.length} screenshot(s) successfully!`, "success");
-                        }
-                    };
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function clearUploadedImages(event) {
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            currentUploadedImages = [];
-            document.getElementById('j-screenshot').value = '';
-            document.getElementById('uploader-preview-container').classList.add('hidden');
-            document.getElementById('uploader-placeholder').classList.remove('hidden');
-            document.getElementById('preview-wrapper-0').classList.add('hidden');
-            document.getElementById('preview-wrapper-1').classList.add('hidden');
-        }
-
-        function editJournalEntry(id) {
-            const entry = journalEntries.find(e => e.id === id);
-            if (!entry) return;
-
-            editingJournalId = id;
-
-            document.getElementById('j-ticker').value = entry.ticker || '';
-            document.getElementById('j-bias').value = entry.bias || 'LONG';
-            document.getElementById('j-score').value = entry.score || '';
-            document.getElementById('j-risk').value = entry.risk || '';
-            document.getElementById('j-outcome').value = entry.outcome || 'PENDING';
-            document.getElementById('j-pnl').value = entry.pnl || '';
-            document.getElementById('j-notes').value = entry.notes || '';
-
-            if (entry.screenshot) {
-                currentUploadedImages = Array.isArray(entry.screenshot) ? [...entry.screenshot] : [entry.screenshot];
-                
-                document.getElementById('uploader-placeholder').classList.add('hidden');
-                document.getElementById('uploader-preview-container').classList.remove('hidden');
-                
-                document.getElementById('preview-wrapper-0').classList.add('hidden');
-                document.getElementById('preview-wrapper-1').classList.add('hidden');
-                
-                currentUploadedImages.forEach((imgSrc, idx) => {
-                    const wrapper = document.getElementById(`preview-wrapper-${idx}`);
-                    const imgEl = document.getElementById(`uploader-preview-img-${idx}`);
-                    if (wrapper && imgEl) {
-                        wrapper.classList.remove('hidden');
-                        imgEl.src = imgSrc;
-                    }
-                });
-            } else {
-                clearUploadedImages();
-            }
-
-            toggleJournalOutcomeStyling();
-            document.getElementById('j-form-title').innerText = "EDIT CURRENT TRANSACTION";
-            document.getElementById('j-submit-btn').innerText = "Update Ledger Entry";
-            document.getElementById('j-import-banner').className = "hidden";
-            document.getElementById('j-cancel-btn').classList.remove('hidden');
-
-            document.getElementById('journal-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            showNotification("Loaded trade entry details into the form editor", "info");
-        }
-
-        function cancelEditJournalEntry() {
-            editingJournalId = null;
-            document.getElementById('journal-form').reset();
-            clearUploadedImages();
-            toggleJournalOutcomeStyling();
-
-            document.getElementById('j-form-title').innerText = "LOG NEW TRANSACTION";
-            document.getElementById('j-submit-btn').innerText = "Commit Entry to Ledger";
-            document.getElementById('j-import-banner').classList.remove('hidden');
-            document.getElementById('j-cancel-btn').classList.add('hidden');
-        }
-
-        function saveJournalEntry(event) {
-            event.preventDefault();
-
-            const tickerInput = document.getElementById('j-ticker').value.toUpperCase().trim();
-            const biasSelect = document.getElementById('j-bias').value;
-            const scoreInput = document.getElementById('j-score').value;
-            const riskInput = document.getElementById('j-risk').value;
-            const outcomeSelect = document.getElementById('j-outcome').value;
-            const pnlInput = document.getElementById('j-pnl').value.trim();
-            const notesInput = document.getElementById('j-notes').value.trim();
-
-            if (!tickerInput) return;
-
-            if (editingJournalId) {
-                const idx = journalEntries.findIndex(e => e.id === editingJournalId);
-                if (idx > -1) {
-                    journalEntries[idx] = {
-                        ...journalEntries[idx],
-                        ticker: tickerInput,
-                        bias: biasSelect,
-                        score: scoreInput ? Number(scoreInput) : null,
-                        risk: riskInput ? Number(riskInput) : null,
-                        outcome: outcomeSelect,
-                        pnl: pnlInput,
-                        notes: notesInput,
-                        screenshot: currentUploadedImages
-                    };
-                    saveJournalToLocalStorage();
-                    showNotification("Ledger trade entry updated successfully!", "success");
-                }
-                cancelEditJournalEntry();
-            } else {
-                const newEntry = {
-                    id: 'trade-' + Date.now(),
-                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }),
-                    ticker: tickerInput,
-                    bias: biasSelect,
-                    score: scoreInput ? Number(scoreInput) : null,
-                    risk: riskInput ? Number(riskInput) : null,
-                    outcome: outcomeSelect,
-                    pnl: pnlInput,
-                    notes: notesInput,
-                    screenshot: currentUploadedImages
-                };
-                journalEntries.unshift(newEntry);
-                saveJournalToLocalStorage();
-                document.getElementById('journal-form').reset();
-                clearUploadedImages();
-                toggleJournalOutcomeStyling();
-                showNotification("Successfully logged trade down into ledger archive!", "success");
-            }
-
-            renderJournalFeed();
-        }
-
-        function deleteJournalEntry(id) {
-            if(confirm("Confirm deletion of this trade record parameter?")) {
-                journalEntries = journalEntries.filter(e => e.id !== id);
-                saveJournalToLocalStorage();
-                renderJournalFeed();
-                showNotification("Record successfully dropped from active index ledger", "info");
-            }
-        }
-
-        function filterJournal(type) {
-            journalFilter = type;
-            const tabs = ['ALL', 'WIN', 'LOSS'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`filter-j-${t.toLowerCase()}`);
-                if(t === type) {
-                    btn.className = "px-2.5 py-1 text-[10px] font-bold uppercase rounded bg-slate-900 text-cyan-400";
-                } else {
-                    btn.className = "px-2.5 py-1 text-[10px] font-bold uppercase rounded text-slate-400 hover:text-slate-200";
-                }
-            });
-            renderJournalFeed();
-        }
-
-        function renderJournalFeed() {
-            const container = document.getElementById('journal-ledger-container');
-            container.innerHTML = '';
-
-            const filtered = journalEntries.filter(e => {
-                if (journalFilter === 'ALL') return true;
-                return e.outcome === journalFilter;
-            });
-
-            if (filtered.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-12 bg-slate-950/40 border border-slate-850 rounded-xl space-y-3">
-                        <i data-lucide="folder-open" class="h-10 w-10 mx-auto text-slate-700"></i>
-                        <p class="text-slate-500 text-xs font-semibold">No journal entries found matching criteria.</p>
-                        <p class="text-[10px] text-slate-600">Log a new trade setup on the left form panel to begin.</p>
-                    </div>
-                `;
-                lucide.createIcons();
-                return;
-            }
-
-            filtered.forEach(entry => {
-                const card = document.createElement('div');
-                
-                let outcomeBadgeClass = "";
-                let cardGlowBorder = "border-slate-850";
-                if (entry.outcome === 'WIN') {
-                    outcomeBadgeClass = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-                    cardGlowBorder = "border-emerald-500/10 hover:border-emerald-500/30";
-                } else if (entry.outcome === 'LOSS') {
-                    outcomeBadgeClass = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
-                    cardGlowBorder = "border-rose-500/10 hover:border-rose-500/30";
-                } else {
-                    outcomeBadgeClass = "bg-slate-800 text-slate-300 border border-slate-750";
-                }
-
-                const biasBadgeClass = entry.bias === 'LONG' ? "bg-emerald-500/10 text-emerald-400" : "bg-rose-500/10 text-rose-400";
-
-                let imageThumbnailsHtml = '';
-                if (entry.screenshot) {
-                    const imgArray = Array.isArray(entry.screenshot) ? entry.screenshot : [entry.screenshot];
-                    if (imgArray.length > 0) {
-                        imageThumbnailsHtml = `<div class="grid grid-cols-2 gap-2 mt-3">`;
-                        imgArray.forEach(imgSrc => {
-                            imageThumbnailsHtml += `
-                                <div class="relative group rounded-lg overflow-hidden border border-slate-800/80 max-h-48 bg-slate-950 flex items-center justify-center cursor-zoom-in" onclick="openLightbox('${imgSrc}')">
-                                    <img src="${imgSrc}" alt="Trade Screenshot" class="max-h-48 object-cover w-full opacity-90 group-hover:opacity-100 transition-opacity" />
-                                    <div class="absolute inset-0 bg-slate-950/40 group-hover:bg-transparent transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <span class="text-[9px] bg-slate-900/90 text-cyan-400 font-bold px-2 py-1 rounded border border-slate-700 uppercase tracking-widest">Zoom Canvas</span>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        imageThumbnailsHtml += `</div>`;
-                    }
-                }
-
-                card.className = `p-5 rounded-2xl bg-slate-950 border text-xs space-y-4 shadow transition-all duration-300 ${cardGlowBorder}`;
-                card.innerHTML = `
-                    <div class="flex justify-between items-start flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-base font-black tracking-wider text-slate-100">${entry.ticker}</span>
-                            <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest ${biasBadgeClass}">${entry.bias}</span>
-                            <span class="px-2 py-0.5 rounded text-[9px] font-black tracking-widest ${outcomeBadgeClass}">${entry.outcome}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-[10px] font-bold text-slate-500">${entry.date}</span>
-                            <div class="flex gap-1.5">
-                                <button onclick="editJournalEntry('${entry.id}')" class="p-1 hover:text-cyan-400 text-slate-600 transition" title="Modify details">
-                                    <i data-lucide="edit-2" class="h-3.5 w-3.5"></i>
-                                </button>
-                                <button onclick="deleteJournalEntry('${entry.id}')" class="p-1 hover:text-rose-400 text-slate-600 transition" title="Purge transaction">
-                                    <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-2 py-2 border-y border-slate-900/60 text-center">
-                        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-900">
-                            <span class="text-[9px] text-slate-500 uppercase block font-semibold tracking-wider">Aggregate Score</span>
-                            <span class="text-xs font-black text-cyan-400">${entry.score ? entry.score + '%' : 'N/A'}</span>
-                        </div>
-                        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-900">
-                            <span class="text-[9px] text-slate-500 uppercase block font-semibold tracking-wider">Allocated Risk</span>
-                            <span class="text-xs font-black text-slate-300">${entry.risk ? entry.risk + '%' : 'N/A'}</span>
-                        </div>
-                        <div class="bg-slate-900/40 p-2 rounded-xl border border-slate-900">
-                            <span class="text-[9px] text-slate-500 uppercase block font-semibold tracking-wider">Statement Return</span>
-                            <span class="text-xs font-black ${entry.outcome === 'WIN' ? 'text-emerald-400' : entry.outcome === 'LOSS' ? 'text-rose-400' : 'text-slate-400'}">${entry.pnl || 'PENDING'}</span>
-                        </div>
-                    </div>
-
-                    ${entry.notes ? `
-                    <div class="bg-slate-900/30 p-3 rounded-xl border border-slate-900 text-[11px] text-slate-300 leading-relaxed font-medium">
-                        <span class="text-[9px] font-black uppercase text-slate-500 block mb-1 tracking-wider">Session Playbook Review</span>
-                        <p class="whitespace-pre-wrap">${entry.notes}</p>
-                    </div>` : ''}
-
-                    ${imageThumbnailsHtml}
-                `;
-                container.appendChild(card);
-            });
-
-            lucide.createIcons();
-        }
-
-        function loadCalendarData() {
-            try {
-                const saved = localStorage.getItem('darren_trading_calendar');
-                if (saved) {
-                    dailyProfits = JSON.parse(saved);
-                } else {
-                    dailyProfits = {};
-                }
-            } catch (err) {
-                console.error("Failed to parse calendar profits", err);
-                dailyProfits = {};
-            }
-        }
-
-        function saveCalendarToLocalStorage() {
-            try {
-                localStorage.setItem('darren_trading_calendar', JSON.stringify(dailyProfits));
-            } catch (e) {
-                showNotification("Failed to write calendar entries to disk.", "error");
-            }
-        }
-
-        function setCalendarToToday() {
-            calendarDate = new Date();
-            renderCalendar();
-            
-            const yyyy = calendarDate.getFullYear();
-            const mm = String(calendarDate.getMonth() + 1).padStart(2, '0');
-            const dd = String(calendarDate.getDate()).padStart(2, '0');
-            selectCalDate(`${yyyy}-${mm}-${dd}`);
-        }
-
-        function navigateMonth(offset) {
-            calendarDate.setMonth(calendarDate.getMonth() + offset);
-            renderCalendar();
-        }
-
-        function selectCalDayOutcome(type) {
-            selectedCalDayOutcomeVal = type;
-            const winBtn = document.getElementById('btn-cal-outcome-win');
-            const lossBtn = document.getElementById('btn-cal-outcome-loss');
-            const flatBtn = document.getElementById('btn-cal-outcome-flat');
-            const currencySymbol = document.getElementById('cal-currency-symbol');
-            const amountInput = document.getElementById('cal-day-amount');
-
-            winBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition text-slate-400 hover:bg-slate-900";
-            lossBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition text-slate-400 hover:bg-slate-900";
-            flatBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition text-slate-400 hover:bg-slate-900";
-
-            if (type === 'WIN') {
-                winBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
-                currencySymbol.className = "absolute left-3 top-1/2 -translate-y-1/2 text-emerald-400 font-black";
-                amountInput.className = "w-full bg-slate-950 border border-slate-800 text-emerald-400 focus:border-cyan-500 rounded-lg pl-8 pr-3 py-2 text-xs font-bold outline-none transition";
-            } else if (type === 'LOSS') {
-                lossBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition bg-rose-500/20 text-rose-400 border border-rose-500/30";
-                currencySymbol.className = "absolute left-3 top-1/2 -translate-y-1/2 text-rose-400 font-black";
-                amountInput.className = "w-full bg-slate-950 border border-slate-800 text-rose-400 focus:border-cyan-500 rounded-lg pl-8 pr-3 py-2 text-xs font-bold outline-none transition";
-            } else {
-                flatBtn.className = "py-1 rounded text-[10px] font-bold uppercase transition bg-slate-800 text-slate-300 border border-slate-700";
-                currencySymbol.className = "absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 font-black";
-                amountInput.className = "w-full bg-slate-950 border border-slate-800 text-slate-400 focus:border-cyan-500 rounded-lg pl-8 pr-3 py-2 text-xs font-bold outline-none transition";
-            }
-        }
-
-        function selectCalDate(dateString) {
-            document.getElementById('cal-editor-date').value = dateString;
-            
-            const parts = dateString.split('-');
-            const dateObj = new Date(parts, parts - 1, parts);
-            const readable = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('cal-editor-date-text').innerText = readable;
-
-            const existing = dailyProfits[dateString];
-            if (existing) {
-                selectCalDayOutcome(existing.outcome);
-                document.getElementById('cal-day-amount').value = existing.amount || '';
-                document.getElementById('cal-day-notes').value = existing.notes || '';
-            } else {
-                selectCalDayOutcome('WIN');
-                document.getElementById('cal-day-amount').value = '';
-                document.getElementById('cal-day-notes').value = '';
-            }
-
-            const cells = document.querySelectorAll('.calendar-day-cell');
-            cells.forEach(c => {
-                if (c.getAttribute('data-date') === dateString) {
-                    c.classList.add('ring-2', 'ring-cyan-400', 'scale-95');
-                } else {
-                    c.classList.remove('ring-2', 'ring-cyan-400', 'scale-95');
-                }
-            });
-        }
-
-        function saveDailyProfit(event) {
-            event.preventDefault();
-            const dateString = document.getElementById('cal-editor-date').value;
-            if (!dateString) {
-                showNotification("Please select a specific date on calendar first", "error");
-                return;
-            }
-
-            const amountVal = parseFloat(document.getElementById('cal-day-amount').value) || 0;
-            const notesVal = document.getElementById('cal-day-notes').value.trim();
-
-            if (amountVal === 0 && selectedCalDayOutcomeVal !== 'FLAT') {
-                showNotification("Amount cannot be zero unless FLAT outcome selected", "error");
-                return;
-            }
-
-            dailyProfits[dateString] = {
-                outcome: selectedCalDayOutcomeVal,
-                amount: amountVal,
-                notes: notesVal
-            };
-
-            saveCalendarToLocalStorage();
-            renderCalendar();
-            showNotification(`Updated performance tracker for ${dateString}`, "success");
-        }
-
-        function renderCalendar() {
-            const grid = document.getElementById('calendar-grid-cells');
-            grid.innerHTML = '';
-
-            const currentYear = calendarDate.getFullYear();
-            const currentMonth = calendarDate.getMonth();
-
-            const monthNames = [
-                "January", "February", "March", "April", "May", "June", 
-                "July", "August", "September", "October", "November", "December"
-            ];
-            document.getElementById('calendar-month-year-label').innerText = `${monthNames[currentMonth]} ${currentYear}`;
-
-            const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
-            const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const totalDaysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
-
-            let netMonthProfit = 0;
-            let greenDaysCount = 0;
-            let redDaysCount = 0;
-            let totalFilledDays = 0;
-
-            for (let i = firstDayIndex; i > 0; i--) {
-                const dayNum = totalDaysInPrevMonth - i + 1;
-                const div = document.createElement('div');
-                div.className = "min-h-[70px] p-2 bg-slate-950/20 border border-slate-900/40 rounded-xl text-slate-700 text-left text-[11px] font-bold select-none pointer-events-none";
-                div.innerText = dayNum;
-                grid.appendChild(div);
-            }
-
-            for (let day = 1; day <= totalDaysInMonth; day++) {
-                const yyyy = currentYear;
-                const mm = String(currentMonth + 1).padStart(2, '0');
-                const dd = String(day).padStart(2, '0');
-                const dateKey = `${yyyy}-${mm}-${dd}`;
-                
-                const profitData = dailyProfits[dateKey];
-                let cellStyleClass = "bg-slate-950 hover:bg-slate-900 border-slate-850 hover:border-slate-800 text-slate-300";
-                let innerBadgeHtml = '';
-
-                if (profitData) {
-                    totalFilledDays++;
-                    if (profitData.outcome === 'WIN') {
-                        netMonthProfit += profitData.amount;
-                        greenDaysCount++;
-                        cellStyleClass = "bg-emerald-950/45 border-emerald-500/20 hover:bg-emerald-950 text-emerald-200";
-                        innerBadgeHtml = `<div class="text-[13px] font-black tracking-tighter text-emerald-400 mt-1 truncate">+$${parseFloat(profitData.amount)}</div>`;
-                    } else if (profitData.outcome === 'LOSS') {
-                        netMonthProfit -= profitData.amount;
-                        redDaysCount++;
-                        cellStyleClass = "bg-rose-950/45 border-rose-500/20 hover:bg-rose-950 text-rose-200";
-                        innerBadgeHtml = `<div class="text-[13px] font-black tracking-tighter text-rose-400 mt-1 truncate">-$${parseFloat(profitData.amount)}</div>`;
-                    } else {
-                        cellStyleClass = "bg-slate-900 border-slate-750 hover:bg-slate-850 text-slate-400";
-                        innerBadgeHtml = `<div class="text-[13px] uppercase font-bold text-slate-500 mt-1">FLAT</div>`;
-                    }
-                }
-
-                const cell = document.createElement('div');
-                cell.className = `calendar-day-cell min-h-[72px] p-2 border rounded-xl text-left text-[11px] font-black cursor-pointer flex flex-col justify-between transition-all select-none ${cellStyleClass}`;
-                cell.setAttribute('data-date', dateKey);
-                cell.onclick = () => selectCalDate(dateKey);
-                cell.innerHTML = `<span>${day}</span>${innerBadgeHtml}`;
-                grid.appendChild(cell);
-            }
-
-            const pnlLabelEl = document.getElementById('cal-stat-pnl');
-            const winRatePercent = totalFilledDays > 0 ? Math.round(((greenDaysCount) / totalFilledDays) * 100) : 0;
-
-            if (netMonthProfit > 0) {
-                pnlLabelEl.innerText = `+$${netMonthProfit}`;
-                pnlLabelEl.className = "text-base font-black tracking-tight text-emerald-400";
-            } else if (netMonthProfit < 0) {
-                pnlLabelEl.innerText = `-$${Math.abs(netMonthProfit)}`;
-                pnlLabelEl.className = "text-base font-black tracking-tight text-rose-400";
-            } else {
-                pnlLabelEl.innerText = `$${netMonthProfit}`;
-                pnlLabelEl.className = "text-base font-black tracking-tight text-slate-300";
-            }
-
-            document.getElementById('cal-stat-winrate').innerText = `${winRatePercent}%`;
-            document.getElementById('cal-stat-green').innerText = `${greenDaysCount} Day${greenDaysCount !== 1 ? 's' : ''}`;
-            document.getElementById('cal-stat-red').innerText = `${redDaysCount} Day${redDaysCount !== 1 ? 's' : ''}`;
-
-            const currentSelected = document.getElementById('cal-editor-date').value;
-            if (currentSelected) {
-                selectCalDate(currentSelected);
-            }
-        }
-
-        function openLightbox(src) {
-            const modal = document.getElementById('lightbox-modal');
-            const img = document.getElementById('lightbox-img');
-            if (modal && img) {
-                img.src = src;
-                modal.classList.remove('hidden');
-            }
-        }
-
-        function closeLightbox() {
-            const modal = document.getElementById('lightbox-modal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeLightbox();
-            }
-        });
-
-        window.onload = function() {
-            loadJournalData();
-            loadCalendarData();
-
-            initMatrix();
-            renderTable();
-            renderTriggers();
-            renderWeightEditor();
-            calculateAllScores();
-
-            setCalendarToToday();
-
-            lucide.createIcons();
-        }
-    </script>
+      });
+    }
+
+    function navigateMonth(direction) {
+      currentDate.setMonth(currentDate.getMonth() + direction);
+      renderDashboard();
+    }
+
+    // Modal Control Sets
+    function openModal() {
+      document.getElementById('form-date').value = `${systemYear}-${String(systemMonth + 1).padStart(2, '0')}-${String(systemDay).padStart(2, '0')}`;
+      document.getElementById('modal-preview-zone').innerHTML = `<i data-lucide="image-plus" class="w-4 h-4 text-slate-500"></i><span class="text-[10px]">Tap to upload chart file</span>`;
+      lucide.createIcons();
+      document.getElementById('trade-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('trade-modal').classList.add('hidden');
+      document.getElementById('trade-form').reset();
+    }
+
+    function saveTrade(e) {
+      e.preventDefault();
+      
+      const imageFile = document.getElementById('form-image').files[0];
+      
+      const proceedSave = (imageDataUrl = null) => {
+        const newTrade = {
+          id: crypto.randomUUID(),
+          date: document.getElementById('form-date').value,
+          asset: document.getElementById('form-asset').value.toUpperCase().trim(),
+          tag: document.getElementById('form-tag').value.trim(),
+          pnl: parseFloat(document.getElementById('form-pnl').value),
+          image: imageDataUrl
+        };
+        trades.push(newTrade);
+        localStorage.setItem('koce_executive_trades', JSON.stringify(trades));
+        closeModal();
+        renderDashboard();
+      };
+
+      if (imageFile) {
+        const reader = new FileReader();
+        reader.onloadend = () => proceedSave(reader.result);
+        reader.readAsDataURL(imageFile);
+      } else {
+        proceedSave();
+      }
+    }
+
+    function deleteTrade(id) {
+      trades = trades.filter(t => t.id !== id);
+      localStorage.setItem('koce_executive_trades', JSON.stringify(trades));
+      renderDashboard();
+    }
+  </script>
 </body>
 </html>
