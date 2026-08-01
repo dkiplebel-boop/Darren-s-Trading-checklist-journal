@@ -405,11 +405,102 @@ let state = {
   editingTradeId: null,
   editingPlaybookId: null,
   activeDay: null,
+  syncStatus: "idle",   // idle | connected | syncing | error
   filters: { search:"", side:"all", setup:"all" }
 };
 
 let chartRefs = {};
-const hasStorage = (typeof window !== "undefined" && !!window.storage);
+const hasCloudStorage = (typeof window !== "undefined" && !!window.storage);
+const hasLocalStorage = (function(){
+  try{ const k="__kc_probe__"; window.localStorage.setItem(k,"1"); window.localStorage.removeItem(k); return true; }
+  catch(e){ return false; }
+})();
+const hasStorage = hasCloudStorage || hasLocalStorage;
+
+async function storageGet(key){
+  if(hasCloudStorage){
+    const r = await window.storage.get(key, true);
+    return r.value;
+  }
+  if(hasLocalStorage){
+    const v = window.localStorage.getItem(key);
+    if(v === null) throw new Error("not found: " + key);
+    return v;
+  }
+  throw new Error("no storage available");
+}
+async function storageSet(key, value){
+  if(hasCloudStorage){ await window.storage.set(key, value, true); return; }
+  if(hasLocalStorage){ window.localStorage.setItem(key, value); }
+}
+
+/* ---------------- GitHub Gist sync (cross-device) ---------------- */
+const GIST_FILENAME = "kc-journal-data.json";
+function getGistConfig(){
+  if(!hasLocalStorage) return { token:"", gistId:"" };
+  return {
+    token: (window.localStorage.getItem("kc_gh_token") || "").trim(),
+    gistId: (window.localStorage.getItem("kc_gh_gist_id") || "").trim()
+  };
+}
+function hasGistConfig(){
+  const c = getGistConfig();
+  return !!(c.token && c.gistId);
+}
+async function gistFetchData(){
+  const { token, gistId } = getGistConfig();
+  const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+    headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json" }
+  });
+  if(!res.ok) throw new Error("Gist fetch failed: " + res.status);
+  const json = await res.json();
+  const file = json.files && json.files[GIST_FILENAME];
+  if(!file || !file.content) throw new Error("No data file in gist yet");
+  return JSON.parse(file.content);
+}
+async function gistPushData(data){
+  const { token, gistId } = getGistConfig();
+  const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+    method: "PATCH",
+    headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
+    body: JSON.stringify({ files: { [GIST_FILENAME]: { content: JSON.stringify(data, null, 2) } } })
+  });
+  if(!res.ok) throw new Error("Gist push failed: " + res.status);
+  return res.json();
+}
+async function gistCreate(token, data){
+  const res = await fetch(`https://api.github.com/gists`, {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
+    body: JSON.stringify({
+      description: "KC Trading Journal data",
+      public: false,
+      files: { [GIST_FILENAME]: { content: JSON.stringify(data, null, 2) } }
+    })
+  });
+  if(!res.ok) throw new Error("Gist create failed: " + res.status);
+  const json = await res.json();
+  return json.id;
+}
+async function syncToGistIfConfigured(){
+  if(!hasGistConfig()) return;
+  state.syncStatus = "syncing";
+  renderTopbarActions();
+  try{
+    await gistPushData({
+      trades: state.trades,
+      playbook: state.playbook,
+      journal: state.journal,
+      startingBalance: state.startingBalance,
+      updatedAt: new Date().toISOString()
+    });
+    state.syncStatus = "connected";
+  }catch(e){
+    console.error(e);
+    state.syncStatus = "error";
+  }
+  renderTopbarActions();
+}
 
 /* ---------------- Utilities ---------------- */
 const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
@@ -474,10 +565,25 @@ function seedTrades(){
 
 /* ---------------- Storage ---------------- */
 async function loadData(){
+  if(hasGistConfig()){
+    try{
+      const remote = await gistFetchData();
+      state.trades = remote.trades || [];
+      state.playbook = (remote.playbook && remote.playbook.length) ? remote.playbook : seedPlaybook();
+      state.journal = remote.journal || {};
+      state.startingBalance = (remote.startingBalance != null) ? remote.startingBalance : 10000;
+      state.syncStatus = "connected";
+      return;
+    }catch(e){
+      console.error(e);
+      state.syncStatus = "error";
+      // fall through to local/cloud storage below so the app still works while disconnected
+    }
+  }
+
   try{
-    if(!hasStorage) throw new Error("no storage");
-    const r = await window.storage.get("kc_trades", true);
-    state.trades = JSON.parse(r.value);
+    const v = await storageGet("kc_trades");
+    state.trades = JSON.parse(v);
   }catch(e){ state.trades = seedTrades(); await saveTrades(); }
 
   // One-time seed: if this browser/account has no trades saved yet, ship with the fixed sample dataset
@@ -485,39 +591,36 @@ async function loadData(){
   try{
     if(hasStorage){
       let seeded = false;
-      try{ await window.storage.get("kc_demo_v2_seeded", true); seeded = true; }catch(e){ seeded = false; }
+      try{ await storageGet("kc_demo_v2_seeded"); seeded = true; }catch(e){ seeded = false; }
       if(!seeded){
         if(state.trades.length === 0){
           state.trades = seedTrades();
           await saveTrades();
         }
-        await window.storage.set("kc_demo_v2_seeded", "1", true);
+        await storageSet("kc_demo_v2_seeded", "1");
       }
     }
   }catch(e){ /* non-critical */ }
 
   try{
-    if(!hasStorage) throw new Error("no storage");
-    const r = await window.storage.get("kc_playbook", true);
-    state.playbook = JSON.parse(r.value);
+    const v = await storageGet("kc_playbook");
+    state.playbook = JSON.parse(v);
   }catch(e){ state.playbook = seedPlaybook(); await savePlaybook(); }
 
   try{
-    if(!hasStorage) throw new Error("no storage");
-    const r = await window.storage.get("kc_journal", true);
-    state.journal = JSON.parse(r.value);
+    const v = await storageGet("kc_journal");
+    state.journal = JSON.parse(v);
   }catch(e){ state.journal = {}; await saveJournal(); }
 
   try{
-    if(!hasStorage) throw new Error("no storage");
-    const r = await window.storage.get("kc_starting_balance", true);
-    state.startingBalance = parseFloat(r.value) || 0;
+    const v = await storageGet("kc_starting_balance");
+    state.startingBalance = parseFloat(v) || 0;
   }catch(e){ state.startingBalance = 10000; await saveStartingBalance(); }
 }
-async function saveTrades(){ if(!hasStorage) return; try{ await window.storage.set("kc_trades", JSON.stringify(state.trades), true); }catch(e){ console.error(e); } }
-async function savePlaybook(){ if(!hasStorage) return; try{ await window.storage.set("kc_playbook", JSON.stringify(state.playbook), true); }catch(e){ console.error(e); } }
-async function saveJournal(){ if(!hasStorage) return; try{ await window.storage.set("kc_journal", JSON.stringify(state.journal), true); }catch(e){ console.error(e); } }
-async function saveStartingBalance(){ if(!hasStorage) return; try{ await window.storage.set("kc_starting_balance", String(state.startingBalance), true); }catch(e){ console.error(e); } }
+async function saveTrades(){ if(hasStorage){ try{ await storageSet("kc_trades", JSON.stringify(state.trades)); }catch(e){ console.error(e); } } await syncToGistIfConfigured(); }
+async function savePlaybook(){ if(hasStorage){ try{ await storageSet("kc_playbook", JSON.stringify(state.playbook)); }catch(e){ console.error(e); } } await syncToGistIfConfigured(); }
+async function saveJournal(){ if(hasStorage){ try{ await storageSet("kc_journal", JSON.stringify(state.journal)); }catch(e){ console.error(e); } } await syncToGistIfConfigured(); }
+async function saveStartingBalance(){ if(hasStorage){ try{ await storageSet("kc_starting_balance", String(state.startingBalance)); }catch(e){ console.error(e); } } await syncToGistIfConfigured(); }
 
 /* ---------------- Stats ---------------- */
 function computeStats(trades){
@@ -568,12 +671,28 @@ const PAGE_META = {
   journal: { title:"Notes", sub:"The story behind the numbers." },
 };
 
+function syncDotColor(){
+  if(state.syncStatus === "connected") return "#42E39A";
+  if(state.syncStatus === "error") return "#FF6B6B";
+  if(state.syncStatus === "syncing") return "#E3B75C";
+  return "#767C8C";
+}
+function syncStatusTitle(){
+  if(state.syncStatus === "connected") return "GitHub sync connected";
+  if(state.syncStatus === "error") return "GitHub sync error — click to fix";
+  if(state.syncStatus === "syncing") return "Syncing…";
+  return "Not connected — click to set up cross-device sync";
+}
 function renderTopbarActions(){
   const el = document.getElementById("topbarActions");
+  const syncBtn = `<button class="icon-btn" data-action="open-sync" title="${syncStatusTitle()}" style="position:relative;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-3-6.7"/><path d="M21 3v6h-6"/></svg>
+    <span style="position:absolute;top:3px;right:3px;width:7px;height:7px;border-radius:50%;background:${syncDotColor()};border:1.5px solid var(--bg-panel);"></span>
+  </button>`;
   if(state.activeTab === "playbook"){
-    el.innerHTML = `<button class="btn btn-ghost" data-action="new-playbook">+ New strategy</button><button class="btn btn-primary" data-action="new-trade">+ Add Trade</button>`;
+    el.innerHTML = `<button class="btn btn-ghost" data-action="new-playbook">+ New strategy</button><button class="btn btn-primary" data-action="new-trade">+ Add Trade</button>${syncBtn}`;
   } else {
-    el.innerHTML = `<button class="btn btn-primary" data-action="new-trade">+ Add Trade</button>`;
+    el.innerHTML = `<button class="btn btn-primary" data-action="new-trade">+ Add Trade</button>${syncBtn}`;
   }
 }
 
@@ -684,6 +803,80 @@ async function saveBalanceForm(e){
   closeModal();
   renderTicker();
   renderContent();
+}
+
+function openSyncModal(){
+  const cfg = getGistConfig();
+  const connected = !!(cfg.token && cfg.gistId);
+  document.getElementById("modalRoot").innerHTML = `
+  <div class="modal-overlay" data-action="overlay-close">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><h2>GitHub Sync</h2><button class="modal-close" data-action="close-modal">&times;</button></div>
+      <p style="font-size:12.5px;color:var(--text-dim);line-height:1.65;margin-bottom:16px;">
+        Sync your journal across devices with a private GitHub Gist. Create a
+        <a href="https://github.com/settings/tokens/new?description=KC%20Trading%20Journal&scopes=gist" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline;">Personal Access Token</a>
+        with only the <strong>gist</strong> scope checked, paste it below, then leave Gist ID blank to create a new one — or paste an existing Gist ID to connect this device to a journal you already started elsewhere. Use the <strong>same Gist ID</strong> on every device.
+      </p>
+      <form id="syncForm">
+        <div class="field"><label>Personal Access Token</label><input type="password" id="gh_token" value="${escapeHtml(cfg.token)}" placeholder="ghp_..." autocomplete="off"></div>
+        <div class="field"><label>Gist ID</label><input type="text" id="gh_gistid" value="${escapeHtml(cfg.gistId)}" placeholder="Leave blank to create a new one"></div>
+        <div id="syncModalStatus" class="stat-sub" style="margin-bottom:6px;min-height:16px;"></div>
+        <div class="modal-actions">
+          ${connected ? `<button type="button" class="btn btn-danger" data-action="disconnect-sync">Disconnect</button>` : ""}
+          <button type="button" class="btn btn-ghost" data-action="close-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">${connected ? "Save changes" : "Connect"}</button>
+        </div>
+      </form>
+    </div>
+  </div>`;
+  document.getElementById("syncForm").addEventListener("submit", saveSyncForm);
+}
+
+async function saveSyncForm(e){
+  e.preventDefault();
+  const token = document.getElementById("gh_token").value.trim();
+  const gistIdInput = document.getElementById("gh_gistid").value.trim();
+  const statusEl = document.getElementById("syncModalStatus");
+  if(!token){ statusEl.textContent = "Enter a Personal Access Token first."; statusEl.className = "stat-sub neg"; return; }
+  statusEl.textContent = "Connecting…"; statusEl.className = "stat-sub flat";
+  try{
+    let gistId = gistIdInput;
+    if(!gistId){
+      gistId = await gistCreate(token, {
+        trades: state.trades, playbook: state.playbook, journal: state.journal,
+        startingBalance: state.startingBalance, updatedAt: new Date().toISOString()
+      });
+    }
+    window.localStorage.setItem("kc_gh_token", token);
+    window.localStorage.setItem("kc_gh_gist_id", gistId);
+    try{
+      const remote = await gistFetchData();
+      if(remote){
+        state.trades = remote.trades || state.trades;
+        state.playbook = (remote.playbook && remote.playbook.length) ? remote.playbook : state.playbook;
+        state.journal = remote.journal || state.journal;
+        state.startingBalance = (remote.startingBalance != null) ? remote.startingBalance : state.startingBalance;
+      }
+    }catch(err){ /* new gist has no data yet — that's fine, we'll push current state below */ }
+    await syncToGistIfConfigured();
+    closeModal();
+    renderTicker();
+    renderContent();
+  }catch(err){
+    console.error(err);
+    statusEl.textContent = "Couldn't connect — double check your token and Gist ID.";
+    statusEl.className = "stat-sub neg";
+  }
+}
+
+function disconnectSync(){
+  if(hasLocalStorage){
+    window.localStorage.removeItem("kc_gh_token");
+    window.localStorage.removeItem("kc_gh_gist_id");
+  }
+  state.syncStatus = "idle";
+  closeModal();
+  renderTopbarActions();
 }
 
 function statCard(label, value, cls, sub){
@@ -1243,6 +1436,8 @@ document.addEventListener("click", (e)=>{
 
   if(action === "open-day") return openDayModal(actionEl.dataset.date);
   if(action === "edit-balance") return openBalanceModal();
+  if(action === "open-sync") return openSyncModal();
+  if(action === "disconnect-sync") { if(confirm("Disconnect GitHub sync on this device? Your data stays in the Gist, just won't sync here anymore.")) disconnectSync(); return; }
 
   if(action === "cal-prev"){ state.calendarDate.setMonth(state.calendarDate.getMonth()-1); return renderContent(); }
   if(action === "cal-next"){ state.calendarDate.setMonth(state.calendarDate.getMonth()+1); return renderContent(); }
